@@ -1,0 +1,25 @@
+---
+# Core
+BasedOnStyle: LLVM
+BreakBeforeBraces: Stroustrup
+Standard: c++17
+UseTab: Never
+ColumnLimit: 99
+InsertBraces: true
+IncludeBlocks: Merge
+# Alignment
+PointerAlignment: Left
+QualifierAlignment: Left
+ReferenceAlignment: Pointer
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+AlwaysBreakTemplateDeclarations: true
+AlignConsecutiveAssignments: true
+# Indentation
+IndentWrappedFunctionNames: true
+IndentWidth: 4
+ConstructorInitializerIndentWidth: 6
+PPIndentWidth: 4
+IndentPPDirectives: AfterHash
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: InlineOnly
