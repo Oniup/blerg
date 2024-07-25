@@ -19,6 +19,7 @@ AlignConsecutiveAssignments: true
 IndentWrappedFunctionNames: true
 IndentWidth: 4
 ConstructorInitializerIndentWidth: 6
+PackConstructorInitializers: NextLineOnly
 PPIndentWidth: 4
 IndentPPDirectives: AfterHash
 AccessModifierOffset: -4

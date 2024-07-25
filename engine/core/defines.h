@@ -69,4 +69,6 @@
 #    define IG_REALLOCATE_HEAP_MEMORY(__ptr, __new_size) std::realloc(__ptr, __new_size)
 #endif
 
+#define IG_DEFAULT_CAPACITY_INTERVAL 20
+
 #endif

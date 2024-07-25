@@ -10,8 +10,7 @@ Checks: >-
   readability-redundant-member-init
 WarningsAsErrors: ''
 HeaderFileExtensions: ['', h, hh, hpp, hxx, inc, glsl]
-ImplementationFileExtensions: [c, cc, cpp, cxx, m, mm, java]
-HeaderFilterRegex: (core|doc|drivers|editor|main|modules|platform|scene|servers|tests)/
+ImplementationFileExtensions: [c, cc, cpp, cxx]
 FormatStyle: file
 CheckOptions:
   cppcoreguidelines-pro-type-member-init.IgnoreArrays: true

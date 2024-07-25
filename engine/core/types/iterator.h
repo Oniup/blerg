@@ -16,24 +16,21 @@
 #ifndef IGNITE_CORE_TYPES__ITERATOR_H
 #define IGNITE_CORE_TYPES__ITERATOR_H
 
-#include <stdio.h>
+#include "core/common.h"
 
 template <typename _T, typename _PackedContainer>
 struct IgPackedIterator {
     using Type            = _T;
     using PackedContainer = _PackedContainer;
 
-    PackedContainer* Container = nullptr;
-    size_t Offset              = 0;
-
     constexpr IgPackedIterator() = default;
     constexpr IgPackedIterator(PackedContainer* container, size_t offset)
-          : Container(container), Offset(offset)
+          : m_Container(container), m_Offset(offset)
     {
     }
 
-    inline _T* Ptr() { return Container->Data.Ptr + Offset; }
-    inline const _T* Ptr() const { return Container->Data.Ptr + Offset; }
+    inline _T* Ptr() { return m_Container->Data() + m_Offset; }
+    inline const _T* Ptr() const { return m_Container->Data() + m_Offset; }
 
     constexpr _T& operator*() { return *Ptr(); }
     constexpr _T* operator->() { return Ptr(); }
@@ -45,7 +42,7 @@ struct IgPackedIterator {
 
     constexpr IgPackedIterator& operator++()
     {
-        Offset++;
+        m_Offset++;
         return *this;
     }
 
@@ -58,7 +55,7 @@ struct IgPackedIterator {
 
     constexpr IgPackedIterator& operator--()
     {
-        Offset--;
+        m_Offset--;
         return *this;
     }
 
@@ -71,23 +68,27 @@ struct IgPackedIterator {
 
     constexpr IgPackedIterator operator+(size_t offset) const
     {
-        return IgPackedIterator(Container, Offset + offset);
+        return IgPackedIterator(m_Container, m_Offset + offset);
     }
 
     constexpr IgPackedIterator operator-(size_t offset) const
     {
-        return IgPackedIterator(Container, Offset - offset);
+        return IgPackedIterator(m_Container, m_Offset - offset);
     }
 
     constexpr friend IgPackedIterator operator+(size_t offset, const IgPackedIterator& iter)
     {
-        return IgPackedIterator(iter.Container, iter.Offset + offset);
+        return IgPackedIterator(iter.m_Container, iter.m_Offset + offset);
     }
 
     constexpr friend IgPackedIterator operator-(size_t offset, const IgPackedIterator& iter)
     {
-        return IgPackedIterator(iter.Container, iter.Offset - offset);
+        return IgPackedIterator(iter.m_Container, iter.m_Offset - offset);
     }
+
+private:
+    PackedContainer* m_Container = nullptr;
+    size_t m_Offset              = 0;
 };
 
 template <typename _T, typename _PackedContainer>
@@ -101,7 +102,7 @@ struct IgConstPackedIterator {
     {
     }
 
-    inline const _T* Ptr() const { return m_Container->Data.Ptr + m_Offset; }
+    inline const _T* Ptr() const { return m_Container->Data() + m_Offset; }
 
     constexpr _T& operator*() { return *Ptr(); }
     constexpr _T* operator->() { return Ptr(); }

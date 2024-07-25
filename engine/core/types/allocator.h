@@ -29,8 +29,8 @@ struct IgHeapAllocation {
         size_t Capacity = 0;
         _T* Ptr         = nullptr;
 
-        IG_FORCE_INLINE size_t CalcRequiredCapacitySize(size_t fit_size,
-                                                        size_t capacity_interval) const
+        IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
+                                                                  size_t capacity_interval) const
         {
             size_t interval_count = (size_t)Ignite::RoundUp((double)fit_size / capacity_interval);
             if (interval_count > 0) {
@@ -73,6 +73,8 @@ struct IgHeapAllocation {
             }
         }
 
+        IG_FORCE_INLINE bool IsEmpty() { return Ptr == nullptr; }
+
         IG_FORCE_INLINE void SetToNullptr()
         {
             Ptr      = nullptr;
@@ -90,8 +92,8 @@ struct IgFixedAllocation {
 
         _T Ptr[Capacity];
 
-        IG_FORCE_INLINE size_t CalcRequiredCapacitySize(size_t fit_size,
-                                                        size_t cap_interval_size) const
+        IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
+                                                                  size_t cap_interval_size) const
         {
             size_t interval_count = (size_t)Ignite::RoundUp((double)fit_size / cap_interval_size);
             size_t size           = cap_interval_size * interval_count;
@@ -99,19 +101,20 @@ struct IgFixedAllocation {
             return size;
         }
 
-        IG_FORCE_INLINE void Allocate(size_t size)
+        IG_FORCE_INLINE constexpr void Allocate(size_t size)
         {
             IG_BASIC_ASSERT(size > Capacity,
                             "Cannot allocate more than the capacity in a fixed allocator data");
         }
 
-        IG_FORCE_INLINE void ReAllocate(size_t size)
+        IG_FORCE_INLINE constexpr void ReAllocate(size_t size)
         {
             IG_BASIC_ASSERT(size > Capacity, "Cannot resize fixed allocator data");
         }
 
-        IG_FORCE_INLINE void Free() {}
-        IG_FORCE_INLINE void SetToNullptr() {}
+        IG_FORCE_INLINE constexpr bool IsEmpty() { return false; }
+        IG_FORCE_INLINE constexpr void Free() {}
+        IG_FORCE_INLINE constexpr void SetToNullptr() {}
     };
 };
 

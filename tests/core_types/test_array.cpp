@@ -19,20 +19,20 @@
 TEST(IgArrayTest, DefaultConstructorTest)
 {
     IgArray<int> array;
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.Size(), 0);
 }
 
 TEST(IgArrayTest, SizeConstructorTest)
 {
     IgArray<int> array(10);
-    ASSERT_EQ(array.Size, 10);
+    ASSERT_EQ(array.Size(), 10);
 }
 
 TEST(IgArrayTest, InitializerListConstructorTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
-    ASSERT_EQ(array.Size, 5);
-    for (size_t i = 0; i < array.Size; ++i) {
+    ASSERT_EQ(array.Size(), 5);
+    for (size_t i = 0; i < array.Size(); ++i) {
         ASSERT_EQ(array[i], i + 1);
     }
 }
@@ -41,8 +41,8 @@ TEST(IgArrayTest, CopyConstructorTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     IgArray<int> copy(array);
-    ASSERT_EQ(copy.Size, array.Size);
-    for (size_t i = 0; i < copy.Size; ++i) {
+    ASSERT_EQ(copy.Size(), array.Size());
+    for (size_t i = 0; i < copy.Size(); ++i) {
         ASSERT_EQ(copy[i], array[i]);
     }
 }
@@ -51,11 +51,11 @@ TEST(IgArrayTest, MoveConstructorTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     IgArray<int> moved(Ignite::Move(array));
-    ASSERT_EQ(moved.Size, 5);
-    for (size_t i = 0; i < moved.Size; ++i) {
+    ASSERT_EQ(moved.Size(), 5);
+    for (size_t i = 0; i < moved.Size(); ++i) {
         ASSERT_EQ(moved[i], i + 1);
     }
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.Size(), 0);
 }
 
 TEST(IgArrayTest, CopyAssignmentTest)
@@ -63,8 +63,8 @@ TEST(IgArrayTest, CopyAssignmentTest)
     IgArray<int> array({1, 2, 3, 4, 5});
     IgArray<int> copy;
     copy = array;
-    ASSERT_EQ(copy.Size, array.Size);
-    for (size_t i = 0; i < copy.Size; ++i) {
+    ASSERT_EQ(copy.Size(), array.Size());
+    for (size_t i = 0; i < copy.Size(); ++i) {
         ASSERT_EQ(copy[i], array[i]);
     }
 }
@@ -74,11 +74,11 @@ TEST(IgArrayTest, MoveAssignmentTest)
     IgArray<int> array({1, 2, 3, 4, 5});
     IgArray<int> moved;
     moved = Ignite::Move(array);
-    ASSERT_EQ(moved.Size, 5);
-    for (size_t i = 0; i < moved.Size; ++i) {
+    ASSERT_EQ(moved.Size(), 5);
+    for (size_t i = 0; i < moved.Size(); ++i) {
         ASSERT_EQ(moved[i], i + 1);
     }
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.Size(), 0);
 }
 
 TEST(IgArrayTest, EqualityTest)
@@ -106,7 +106,7 @@ TEST(IgArrayTest, ClearTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.Clear();
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.Size(), 0);
 }
 
 TEST(IgArrayTest, DestroyTest)
@@ -114,14 +114,14 @@ TEST(IgArrayTest, DestroyTest)
     IgArray<int> array({1, 2, 3, 4, 5});
     array.~IgArray();
     // Since the destructor calls Free, which sets Size to 0, we can check that here
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.Size(), 0);
 }
 
 TEST(IgArrayTest, ResizeTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.Resize(3);
-    ASSERT_EQ(array.Size, 3);
+    ASSERT_EQ(array.Size(), 3);
 }
 
 TEST(IgArrayTest, ReserveToFitTest)
@@ -142,7 +142,7 @@ TEST(IgArrayTest, PushBackTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.PushBack(6);
-    ASSERT_EQ(array.Size, 6);
+    ASSERT_EQ(array.Size(), 6);
     ASSERT_EQ(array[5], 6);
 }
 
@@ -150,7 +150,7 @@ TEST(IgArrayTest, PushFrontTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.PushFront(0);
-    ASSERT_EQ(array.Size, 6);
+    ASSERT_EQ(array.Size(), 6);
     ASSERT_EQ(array[0], 0);
 }
 
@@ -158,7 +158,7 @@ TEST(IgArrayTest, InsertTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.Insert(array.Begin() + 2, 99);
-    ASSERT_EQ(array.Size, 6);
+    ASSERT_EQ(array.Size(), 6);
     ASSERT_EQ(array[2], 99);
 }
 
@@ -166,7 +166,7 @@ TEST(IgArrayTest, PopBackTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.PopBack();
-    ASSERT_EQ(array.Size, 4);
+    ASSERT_EQ(array.Size(), 4);
     ASSERT_EQ(array[3], 4);
 }
 
@@ -174,7 +174,7 @@ TEST(IgArrayTest, PopFrontTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.PopFront();
-    ASSERT_EQ(array.Size, 4);
+    ASSERT_EQ(array.Size(), 4);
     ASSERT_EQ(array[0], 2);
 }
 
@@ -182,7 +182,7 @@ TEST(IgArrayTest, EraseTest)
 {
     IgArray<int> array({1, 2, 3, 4, 5});
     array.Erase(array.Begin() + 2, array.Begin() + 4);
-    ASSERT_EQ(array.Size, 3);
+    ASSERT_EQ(array.Size(), 3);
     ASSERT_EQ(array[0], 1);
     ASSERT_EQ(array[1], 2);
     ASSERT_EQ(array[2], 5);
