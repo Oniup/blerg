@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE__MEMORY_UTILS_H
-#define IGNITE_CORE__MEMORY_UTILS_H
+#ifndef IGNITE_CORE_MEMORY__UTILS_H
+#define IGNITE_CORE_MEMORY__UTILS_H
 
 #include "core/defines.h"
 #include "core/type_traits.h"
@@ -78,8 +78,8 @@ IG_FORCE_INLINE constexpr void FillConstructItems(_Iter begin, _Iter end, const 
     }
 }
 
-template <typename _Iter, typename _T>
-IG_FORCE_INLINE constexpr void Fill(_Iter begin, _Iter end, const _T& fill)
+template <typename _Iter>
+IG_FORCE_INLINE constexpr void Fill(_Iter begin, _Iter end, const typename _Iter::Type& fill)
 {
     for (_Iter iter = begin; iter != end; iter++) {
         *iter = fill;
@@ -89,13 +89,17 @@ IG_FORCE_INLINE constexpr void Fill(_Iter begin, _Iter end, const _T& fill)
 // Warning: If items are already initialized, make sure use
 template <typename _Iter>
 IG_FORCE_INLINE constexpr void
-    ConstructItemsInitializerList(_Iter begin,
-                                  const std::initializer_list<typename _Iter::Type> list)
+    CopyInitializerListItems(_Iter begin, const std::initializer_list<typename _Iter::Type>& list)
 {
+    using Type = typename _Iter::Type;
     _Iter iter = begin;
-    using T    = typename _Iter::Type;
-    for (const T& val : list) {
-        new (iter.Ptr()) typename _Iter::Type(val);
+    for (const Type& val : list) {
+        if constexpr (std::is_move_constructible_v<Type>) {
+            new (iter.Ptr()) Type(val);
+        }
+        else {
+            *iter.Ptr() = val;
+        }
         iter++;
     }
 }
@@ -146,23 +150,34 @@ IG_FORCE_INLINE constexpr void MoveConstruct(_T& dest, _T&& src)
 }
 
 template <typename _Iter>
-IG_FORCE_INLINE constexpr void CopyConstructItems(_Iter begin, _Iter end,
-                                                  const typename _Iter::Type* src)
+IG_FORCE_INLINE constexpr void CopyItems(_Iter begin, _Iter end, const typename _Iter::Type* src)
 {
+    using Type  = typename _Iter::Type;
     size_t size = end.Ptr() - begin.Ptr();
     _Iter iter  = begin;
     for (size_t i = 0; i < size; i++, iter++) {
-        new (iter.Ptr()) typename _Iter::Type(src[i]);
+        if constexpr (std::is_copy_constructible_v<Type>) {
+            new (iter.Ptr()) Type(src[i]);
+        }
+        else {
+            *iter.Ptr() = src[i];
+        }
     }
 }
 
 template <typename _Iter>
 IG_FORCE_INLINE constexpr void MoveItems(_Iter begin, _Iter end, const typename _Iter::Type* src)
 {
+    using Type  = typename _Iter::Type;
     size_t size = end.Ptr() - begin.Ptr();
     _Iter iter  = begin;
     for (size_t i = 0; i < size; i++, iter++) {
-        new (iter.Ptr()) typename _Iter::Type(Ignite::Move(src[i]));
+        if constexpr (std::is_move_constructible_v<Type>) {
+            new (iter.Ptr()) Type(Ignite::Move(src[i]));
+        }
+        else {
+            *iter.Ptr() = Ignite::Move(src[i]);
+        }
     }
 }
 

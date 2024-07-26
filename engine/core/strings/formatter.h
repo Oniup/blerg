@@ -13,6 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef IGNITE_CORE_STRINGS__FORMATTER_H
+#define IGNITE_CORE_STRINGS__FORMATTER_H
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -26,3 +29,5 @@ struct IgFormatter {
     template <typename... _Args>
     static constexpr void Format(char* buffer, size_t size);
 };
+
+#endif

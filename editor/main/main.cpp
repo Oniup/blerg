@@ -13,29 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "core/types/array.h"
+#include "core/containers/array.h"
+#include "core/strings/string.h"
 #include <cstdio>
 
 int main()
 {
-    IgArray<const char*> message      = {"Dynamic", "array"};
-    const IgArray<const char*> extend = {
-        "however,",
-        "this",
-        "is",
-        "copied",
-    };
-
-    IgArray message_copy(message);
-    message_copy.PushBack(extend);
-
-    std::printf("From message: ");
-    for (const char* text : message) {
-        std::printf("%s ", text);
-    }
-    std::printf("\nFrom Copyed: ");
-    for (const char* text : message_copy) {
-        std::printf("%s ", text);
-    }
-    std::printf("\n");
+    IgString str = "This is a test";
 }

@@ -32,7 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # ------------------------------------------------------------------------------
 if(${BUILD_IGNITE_LIB})
     add_library(ignite STATIC)
-    add_subdirectory(vender)
+    add_subdirectory(thirdparty)
     add_subdirectory(engine)
 endif()
 

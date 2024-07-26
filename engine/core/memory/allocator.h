@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_TYPES__ALLOCATOR_H
-#define IGNITE_CORE_TYPES__ALLOCATOR_H
+#ifndef IGNITE_CORE_MEMORY__ALLOCATOR_H
+#define IGNITE_CORE_MEMORY__ALLOCATOR_H
 
 #include "core/defines.h"
 #include "math/math.h"
@@ -28,6 +28,10 @@ struct IgHeapAllocation {
 
         size_t Capacity = 0;
         _T* Ptr         = nullptr;
+
+        IG_FORCE_INLINE _T& operator*() const { return *Ptr; }
+        IG_FORCE_INLINE _T& operator[](size_t index) { return Ptr[index]; }
+        IG_FORCE_INLINE const _T& operator[](size_t index) const { return Ptr[index]; }
 
         IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
                                                                   size_t capacity_interval) const
@@ -73,7 +77,7 @@ struct IgHeapAllocation {
             }
         }
 
-        IG_FORCE_INLINE bool IsEmpty() { return Ptr == nullptr; }
+        IG_FORCE_INLINE bool IsEmpty() const { return Ptr == nullptr; }
 
         IG_FORCE_INLINE void SetToNullptr()
         {
@@ -91,6 +95,10 @@ struct IgFixedAllocation {
         static constexpr size_t Capacity = _Capacity;
 
         _T Ptr[Capacity];
+
+        IG_FORCE_INLINE constexpr _T& operator*() const { return *Ptr; }
+        IG_FORCE_INLINE constexpr _T& operator[](size_t index) { return Ptr[index]; }
+        IG_FORCE_INLINE constexpr const _T& operator[](size_t index) const { return Ptr[index]; }
 
         IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
                                                                   size_t cap_interval_size) const
@@ -112,7 +120,7 @@ struct IgFixedAllocation {
             IG_BASIC_ASSERT(size > Capacity, "Cannot resize fixed allocator data");
         }
 
-        IG_FORCE_INLINE constexpr bool IsEmpty() { return false; }
+        IG_FORCE_INLINE constexpr bool IsEmpty() const { return false; }
         IG_FORCE_INLINE constexpr void Free() {}
         IG_FORCE_INLINE constexpr void SetToNullptr() {}
     };

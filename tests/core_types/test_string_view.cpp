@@ -13,30 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "core/types/string_view.h"
+#include "core/strings/string_view.h"
 #include <gtest/gtest.h>
 
 TEST(IgStringViewTest, DefaultConstructorTest)
 {
     IgStringView view;
-    ASSERT_EQ(view.Size(), 0);
-    ASSERT_EQ(view.Data(), nullptr);
+    ASSERT_EQ(view.Size, 0);
+    ASSERT_EQ(view.Ptr, nullptr);
 }
 
 TEST(IgStringViewTest, CStringConstructorTest)
 {
     const char* cstr = "Hello, World!";
     IgStringView view(cstr);
-    ASSERT_EQ(view.Size(), 13);
-    ASSERT_EQ(view.Data(), cstr);
+    ASSERT_EQ(view.Size, 13);
+    ASSERT_EQ(view.Ptr, cstr);
 }
 
 TEST(IgStringViewTest, CStringWithSizeConstructorTest)
 {
     const char* cstr = "Hello, World!";
     IgStringView view(cstr, 5);
-    ASSERT_EQ(view.Size(), 5);
-    ASSERT_EQ(view.Data(), cstr);
+    ASSERT_EQ(view.Size, 5);
+    ASSERT_EQ(view.Ptr, cstr);
 }
 
 TEST(IgStringViewTest, CopyConstructorTest)
@@ -44,8 +44,8 @@ TEST(IgStringViewTest, CopyConstructorTest)
     const char* cstr = "Hello, World!";
     IgStringView original(cstr);
     IgStringView copy(original);
-    ASSERT_EQ(copy.Size(), original.Size());
-    ASSERT_EQ(copy.Data(), original.Data());
+    ASSERT_EQ(copy.Size, original.Size);
+    ASSERT_EQ(copy.Ptr, original.Ptr);
 }
 
 TEST(IgStringViewTest, MoveConstructorTest)
@@ -53,10 +53,10 @@ TEST(IgStringViewTest, MoveConstructorTest)
     const char* cstr = "Hello, World!";
     IgStringView original(cstr);
     IgStringView moved(Ignite::Move(original));
-    ASSERT_EQ(moved.Size(), 13);
-    ASSERT_EQ(moved.Data(), cstr);
-    ASSERT_EQ(original.Size(), 0);
-    ASSERT_EQ(original.Data(), nullptr);
+    ASSERT_EQ(moved.Size, 13);
+    ASSERT_EQ(moved.Ptr, cstr);
+    ASSERT_EQ(original.Size, 0);
+    ASSERT_EQ(original.Ptr, nullptr);
 }
 
 TEST(IgStringViewTest, BeginEndTest)
@@ -131,8 +131,8 @@ TEST(IgStringViewTest, AssignmentOperatorTest)
     const char* cstr = "Hello, World!";
     IgStringView view;
     view = cstr;
-    ASSERT_EQ(view.Size(), 13);
-    ASSERT_EQ(view.Data(), cstr);
+    ASSERT_EQ(view.Size, 13);
+    ASSERT_EQ(view.Ptr, cstr);
 }
 
 TEST(IgStringViewTest, CopyAssignmentOperatorTest)
@@ -141,8 +141,8 @@ TEST(IgStringViewTest, CopyAssignmentOperatorTest)
     IgStringView original(cstr);
     IgStringView copy;
     copy = original;
-    ASSERT_EQ(copy.Size(), original.Size());
-    ASSERT_EQ(copy.Data(), original.Data());
+    ASSERT_EQ(copy.Size, original.Size);
+    ASSERT_EQ(copy.Ptr, original.Ptr);
 }
 
 TEST(IgStringViewTest, MoveAssignmentOperatorTest)
@@ -151,10 +151,10 @@ TEST(IgStringViewTest, MoveAssignmentOperatorTest)
     IgStringView original(cstr);
     IgStringView moved;
     moved = Ignite::Move(original);
-    ASSERT_EQ(moved.Size(), 13);
-    ASSERT_EQ(moved.Data(), cstr);
-    ASSERT_EQ(original.Size(), 0);
-    ASSERT_EQ(original.Data(), nullptr);
+    ASSERT_EQ(moved.Size, 13);
+    ASSERT_EQ(moved.Ptr, cstr);
+    ASSERT_EQ(original.Size, 0);
+    ASSERT_EQ(original.Ptr, nullptr);
 }
 
 TEST(IgStringViewTest, SliceTest)
@@ -162,8 +162,8 @@ TEST(IgStringViewTest, SliceTest)
     const char* cstr = "Hello, World!";
     IgStringView view(cstr);
     IgStringView sliced = view.Slice(7, 5);
-    ASSERT_EQ(sliced.Size(), 5);
-    ASSERT_EQ(sliced.Data(), cstr + 7);
+    ASSERT_EQ(sliced.Size, 5);
+    ASSERT_EQ(sliced.Ptr, cstr + 7);
 }
 
 TEST(IgStringViewTest, SetTest)
@@ -173,8 +173,8 @@ TEST(IgStringViewTest, SetTest)
     IgStringView view1(cstr1);
     IgStringView view2(cstr2);
     view1.Set(view2);
-    ASSERT_EQ(view1.Size(), view2.Size());
-    ASSERT_EQ(view1.Data(), view2.Data());
+    ASSERT_EQ(view1.Size, view2.Size);
+    ASSERT_EQ(view1.Ptr, view2.Ptr);
 }
 
 TEST(IgStringViewTest, CompareTest)
@@ -207,8 +207,9 @@ TEST(IgStringViewTest, FindAllTest)
     const char* cstr = "Hello, World! World!";
     IgStringView view(cstr);
     IgStringView match("World");
-    IgArray<size_t> matches = view.FindAll(match);
-    ASSERT_EQ(matches.Size(), 2);
+    IgArray<size_t> matches;
+    view.FindAll(matches, match);
+    ASSERT_EQ(matches.Size, 2);
     ASSERT_EQ(matches[0], 7);
     ASSERT_EQ(matches[1], 14);
 }

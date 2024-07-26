@@ -11,6 +11,7 @@ Checks: >-
 WarningsAsErrors: ''
 HeaderFileExtensions: ['', h, hh, hpp, hxx, inc, glsl]
 ImplementationFileExtensions: [c, cc, cpp, cxx]
+HeaderFilterRegex: (editor/engine/tests)/
 FormatStyle: file
 CheckOptions:
   cppcoreguidelines-pro-type-member-init.IgnoreArrays: true

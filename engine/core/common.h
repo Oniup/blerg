@@ -17,7 +17,7 @@
 #define IGNITE_CORE__COMMON_H
 
 #include "core/defines.h"
-#include "core/types/allocator.h"
+#include "core/memory/allocator.h"
 #include <cstdint>
 #include <cstdio>
 
