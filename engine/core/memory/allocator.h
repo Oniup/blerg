@@ -22,16 +22,16 @@
 #include <cstdlib>
 
 struct IgHeapAllocation {
-    template <typename _T>
+    template <typename T>
     struct Allocation {
-        using Type = _T;
+        using Type = T;
 
         size_t Capacity = 0;
-        _T* Ptr         = nullptr;
+        T* Ptr          = nullptr;
 
-        IG_FORCE_INLINE _T& operator*() const { return *Ptr; }
-        IG_FORCE_INLINE _T& operator[](size_t index) { return Ptr[index]; }
-        IG_FORCE_INLINE const _T& operator[](size_t index) const { return Ptr[index]; }
+        IG_FORCE_INLINE T& operator*() const { return *Ptr; }
+        IG_FORCE_INLINE T& operator[](size_t index) { return Ptr[index]; }
+        IG_FORCE_INLINE const T& operator[](size_t index) const { return Ptr[index]; }
 
         IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
                                                                   size_t capacity_interval) const
@@ -48,7 +48,7 @@ struct IgHeapAllocation {
             IG_BASIC_ASSERT(Ptr != nullptr,
                             "Allocation already exists! This will result in a memory leak!!!");
             if (capacity > 0) {
-                Ptr = static_cast<_T*>(IG_ALLOCATE_HEAP_MEMORY(capacity * sizeof(_T)));
+                Ptr = static_cast<T*>(IG_ALLOCATE_HEAP_MEMORY(capacity * sizeof(T)));
                 IG_BASIC_ASSERT(Ptr == nullptr, "Failed to allocate heap memory");
                 Capacity = capacity;
             }
@@ -64,7 +64,7 @@ struct IgHeapAllocation {
                 Allocate(capacity);
                 return;
             }
-            Ptr = static_cast<_T*>(IG_REALLOCATE_HEAP_MEMORY(Ptr, capacity * sizeof(_T)));
+            Ptr = static_cast<T*>(IG_REALLOCATE_HEAP_MEMORY(Ptr, capacity * sizeof(T)));
             IG_BASIC_ASSERT(Ptr == nullptr, "Failed to reallocate heap memory");
             Capacity = capacity;
         }
@@ -87,18 +87,18 @@ struct IgHeapAllocation {
     };
 };
 
-template <size_t _Capacity>
+template <size_t SCapacity>
 struct IgFixedAllocation {
-    template <typename _T>
+    template <typename T>
     struct Allocation {
-        using Type                       = _T;
-        static constexpr size_t Capacity = _Capacity;
+        using Type                       = T;
+        static constexpr size_t Capacity = SCapacity;
 
-        _T Ptr[Capacity];
+        T Ptr[Capacity];
 
-        IG_FORCE_INLINE constexpr _T& operator*() const { return *Ptr; }
-        IG_FORCE_INLINE constexpr _T& operator[](size_t index) { return Ptr[index]; }
-        IG_FORCE_INLINE constexpr const _T& operator[](size_t index) const { return Ptr[index]; }
+        IG_FORCE_INLINE constexpr T& operator*() const { return *Ptr; }
+        IG_FORCE_INLINE constexpr T& operator[](size_t index) { return Ptr[index]; }
+        IG_FORCE_INLINE constexpr const T& operator[](size_t index) const { return Ptr[index]; }
 
         IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
                                                                   size_t cap_interval_size) const

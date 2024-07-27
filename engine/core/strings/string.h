@@ -22,12 +22,12 @@
 #include <cstring>
 #include <ctype.h>
 
-template <typename _Allocator, size_t _CapacityIncreaseIntervalSize>
+template <typename TAllocator, size_t TCapacityIncreaseIntervalSize>
 struct IgString {
-    using Allocation    = typename _Allocator::template Allocation<char>;
+    using Allocation    = typename TAllocator::template Allocation<char>;
     using Iterator      = IgPackedIterator<char, IgString>;
     using ConstIterator = IgConstPackedIterator<char, IgString>;
-    static constexpr size_t CapacityIncreaseIntervalSize = _CapacityIncreaseIntervalSize;
+    static constexpr size_t CapacityIncreaseIntervalSize = TCapacityIncreaseIntervalSize;
     static constexpr size_t NoPos                        = IgNumericLimits<size_t>::Max();
 
     size_t Size          = 0;

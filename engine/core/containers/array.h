@@ -22,13 +22,13 @@
 #include "core/memory/utils.h"
 #include <cstdlib>
 
-template <typename _T, typename _Allocator, size_t _CapacityIncreaseIntervalSize>
+template <typename T, typename TAllocator, size_t TCapacityIncreaseIntervalSize>
 struct IgArray {
-    using Type          = _T;
-    using Allocation    = typename _Allocator::template Allocation<_T>;
-    using Iterator      = IgPackedIterator<_T, IgArray>;
-    using ConstIterator = IgConstPackedIterator<_T, IgArray>;
-    static constexpr size_t CapacityIncreaseIntervalSize = _CapacityIncreaseIntervalSize;
+    using Type          = T;
+    using Allocation    = typename TAllocator::template Allocation<T>;
+    using Iterator      = IgPackedIterator<T, IgArray>;
+    using ConstIterator = IgConstPackedIterator<T, IgArray>;
+    static constexpr size_t CapacityIncreaseIntervalSize = TCapacityIncreaseIntervalSize;
     static constexpr size_t NoPos                        = IgNumericLimits<size_t>::Max();
 
     size_t Size          = 0;
@@ -44,7 +44,7 @@ struct IgArray {
         Ignite::DefaultConstructItems(Begin(), End());
     }
 
-    constexpr IgArray(const std::initializer_list<_T>& list)
+    constexpr IgArray(const std::initializer_list<T>& list)
           : IgArray(list.size())
     {
         Ignite::CopyInitializerListItems(Begin(), list);
@@ -58,7 +58,7 @@ struct IgArray {
     }
 
     template <typename _OtherAllocator>
-    constexpr IgArray(const IgArray<_T, _OtherAllocator>& array)
+    constexpr IgArray(const IgArray<T, _OtherAllocator>& array)
           : Size(array.Size)
     {
         Allocator.Allocate(array.Allocator.Capacity);
@@ -85,20 +85,20 @@ struct IgArray {
     constexpr ConstIterator begin() const { return Begin(); }
     constexpr ConstIterator end() const { return End(); }
 
-    constexpr _T* Data() { return Allocator.Ptr; }
-    constexpr const _T* Data() const { return Allocator.Ptr; }
+    constexpr T* Data() { return Allocator.Ptr; }
+    constexpr const T* Data() const { return Allocator.Ptr; }
     constexpr size_t Capacity() const { return Allocator.Capacity; }
 
     constexpr bool IsEmpty() const { return Allocator.IsEmpty() || (Size == 0 || Size == NoPos); }
     constexpr bool IsAllocatorEmpty() const { return Allocator.IsEmpty(); }
 
-    constexpr _T& First() { return Allocator.Ptr[0]; }
-    constexpr const _T& First() const { return Allocator.Ptr[0]; }
-    constexpr _T& Last() { return Allocator.Ptr[Size - 1]; }
-    constexpr const _T& Last() const { return Allocator.Ptr[Size - 1]; }
+    constexpr T& First() { return Allocator.Ptr[0]; }
+    constexpr const T& First() const { return Allocator.Ptr[0]; }
+    constexpr T& Last() { return Allocator.Ptr[Size - 1]; }
+    constexpr const T& Last() const { return Allocator.Ptr[Size - 1]; }
 
     template <typename _OtherAllocator>
-    constexpr IgArray& operator=(const IgArray<_T, _OtherAllocator>& array)
+    constexpr IgArray& operator=(const IgArray<T, _OtherAllocator>& array)
     {
         Ignite::DestructItems(Begin(), End());
         Size = array.Size;
@@ -143,13 +143,13 @@ struct IgArray {
         return true;
     }
 
-    constexpr _T& operator[](size_t index)
+    constexpr T& operator[](size_t index)
     {
         IG_BASIC_ASSERT(index > Size, "Out of range index");
         return Allocator.Ptr[index];
     }
 
-    constexpr const _T& operator[](size_t index) const
+    constexpr const T& operator[](size_t index) const
     {
         IG_BASIC_ASSERT(index > Size, "Out of range index");
         return Allocator.Ptr[index];
@@ -193,11 +193,11 @@ struct IgArray {
     // WARNING: This does not call destructors for existing elements in array.
     constexpr void Reserve(size_t capacity) { Allocator.ReAllocate(capacity); }
 
-    constexpr void PushBack(const _T& val)
+    constexpr void PushBack(const T& val)
     {
         size_t pos = Size;
         Resize(Size + 1);
-        if constexpr (!std::is_pointer_v<_T>) {
+        if constexpr (!std::is_pointer_v<T>) {
             Ignite::CopyConstruct(*(Allocator.Ptr + pos), val);
         }
         else {
@@ -205,11 +205,11 @@ struct IgArray {
         }
     }
 
-    constexpr void PushBack(_T&& val)
+    constexpr void PushBack(T&& val)
     {
         size_t pos = Size;
         Resize(Size + 1);
-        if constexpr (!std::is_pointer_v<_T>) {
+        if constexpr (!std::is_pointer_v<T>) {
             Ignite::MoveConstruct(*(Allocator.Ptr + pos), Ignite::Move(val));
         }
         else {
@@ -218,7 +218,7 @@ struct IgArray {
     }
 
     template <typename _OtherAllocator>
-    constexpr void PushBack(const IgArray<_T, _OtherAllocator>& array)
+    constexpr void PushBack(const IgArray<T, _OtherAllocator>& array)
     {
         size_t pos = Size;
         Resize(Size + array.Size);
@@ -226,19 +226,19 @@ struct IgArray {
         Ignite::CopyItems(offset, End(), array.Allocator.Ptr);
     }
 
-    constexpr void PushBack(const std::initializer_list<_T>& list)
+    constexpr void PushBack(const std::initializer_list<T>& list)
     {
         size_t old_size = Size;
         Resize(Size + list.size());
         Ignite::CopyInitializerListItems(Begin() + old_size, list);
     }
 
-    constexpr void PushFront(const _T& val)
+    constexpr void PushFront(const T& val)
     {
         size_t old_size = Size;
         Resize(Size + 1);
         Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + 1);
-        if constexpr (!std::is_pointer_v<_T>) {
+        if constexpr (!std::is_pointer_v<T>) {
             Ignite::CopyConstruct(Allocator.Ptr[0], val);
         }
         else {
@@ -246,12 +246,12 @@ struct IgArray {
         }
     }
 
-    constexpr void PushFront(_T&& val)
+    constexpr void PushFront(T&& val)
     {
         size_t old_size = Size;
         Resize(Size + 1);
         Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + 1);
-        if constexpr (!std::is_pointer_v<_T>) {
+        if constexpr (!std::is_pointer_v<T>) {
             Ignite::MoveConstruct(*Allocator.Ptr, Ignite::Move(val));
         }
         else {
@@ -260,7 +260,7 @@ struct IgArray {
     }
 
     template <typename _OtherAllocator>
-    constexpr void PushFront(const IgArray<_T, _OtherAllocator>& arr)
+    constexpr void PushFront(const IgArray<T, _OtherAllocator>& arr)
     {
         size_t old_size = Size;
         Resize(Size + arr.Size);
@@ -268,7 +268,7 @@ struct IgArray {
         Ignite::CopyItems(Begin(), Begin() + arr.Size, arr.Allocator.Ptr);
     }
 
-    constexpr void PushFront(const std::initializer_list<_T>& list)
+    constexpr void PushFront(const std::initializer_list<T>& list)
     {
         size_t old_size = Size;
         Resize(Size + list.size());
@@ -276,7 +276,7 @@ struct IgArray {
         Ignite::CopyInitializerListItems(Begin() + old_size, list);
     }
 
-    constexpr void Insert(Iterator pos, _T&& val)
+    constexpr void Insert(Iterator pos, T&& val)
     {
         if (pos == End()) {
             PushBack(val);
@@ -288,7 +288,7 @@ struct IgArray {
             size_t old_size = Size;
             Resize(Size + 1);
             Ignite::ShiftItems(pos, Begin() + old_size, pos + 1);
-            if constexpr (!std::is_same_v<_T, void*>) {
+            if constexpr (!std::is_same_v<T, void*>) {
                 Ignite::MoveConstruct(*pos, Ignite::Move(val));
             }
             else {
@@ -298,7 +298,7 @@ struct IgArray {
     }
 
     template <typename _OtherAllocator>
-    constexpr void Insert(Iterator pos, const IgArray<_T, _OtherAllocator>& arr)
+    constexpr void Insert(Iterator pos, const IgArray<T, _OtherAllocator>& arr)
     {
         if (pos == End()) {
             PushBack(arr);
@@ -314,7 +314,7 @@ struct IgArray {
         }
     }
 
-    constexpr void Insert(Iterator pos, const std::initializer_list<_T>& list)
+    constexpr void Insert(Iterator pos, const std::initializer_list<T>& list)
     {
         if (pos == End()) {
             PushBack(list);
@@ -375,7 +375,7 @@ struct IgArray {
         }
     }
 
-    constexpr bool Erase(const _T& val)
+    constexpr bool Erase(const T& val)
     {
         size_t offset = Find(val);
         if (offset == NoPos) {
@@ -387,7 +387,7 @@ struct IgArray {
 
     constexpr void Erase(Iterator pos) { PopSlice(pos, pos + 1); }
 
-    constexpr size_t Find(const _T& val) const
+    constexpr size_t Find(const T& val) const
     {
         for (size_t i = 0; i < Size; ++i) {
             if (Allocator.Ptr[i] == val) {
@@ -397,7 +397,7 @@ struct IgArray {
         return NoPos;
     }
 
-    constexpr size_t FindLast(const _T& val) const
+    constexpr size_t FindLast(const T& val) const
     {
         for (size_t i = Size - 1; i > 0; --i) {
             if (Allocator.Ptr[i] == val) {

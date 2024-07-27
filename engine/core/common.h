@@ -24,30 +24,30 @@
 // Allocators
 // ------------------------------------------------------------------------------------------------
 struct IgHeapAllocation;
-template <size_t _Capacity>
+template <size_t SCapacity>
 struct IgFixedAllocation;
 
 // Iterators
 // ------------------------------------------------------------------------------------------------
-template <typename _T, typename _PackedContainer>
+template <typename T, typename TPackedContainer>
 struct IgPackedIterator;
-template <typename _T, typename _PackedContainer>
+template <typename T, typename TPackedContainer>
 struct IgConstPackedIterator;
 
 // Strings
 // ------------------------------------------------------------------------------------------------
 struct IgStringView;
-template <typename _T>
+template <typename T>
 struct IgStringViewCast;
 
-template <typename _Allocator                  = IgHeapAllocation,
-          size_t _CapacityIncreaseIntervalSize = IG_DEFAULT_CAPACITY_INTERVAL>
+template <typename TAllocator                  = IgHeapAllocation,
+          size_t SCapacityIncreaseIntervalSize = IG_DEFAULT_CAPACITY_INTERVAL>
 struct IgString;
 
 // Common Templated types
 // ------------------------------------------------------------------------------------------------
-template <typename _T, typename _Allocator = IgHeapAllocation,
-          size_t _CapacityIncreaseIntervalSize = IG_DEFAULT_CAPACITY_INTERVAL>
+template <typename T, typename TAllocator = IgHeapAllocation,
+          size_t SCapacityIncreaseIntervalSize = IG_DEFAULT_CAPACITY_INTERVAL>
 struct IgArray;
 
 #endif
