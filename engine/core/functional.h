@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE__FUNCTIONAL_H
-#define IGNITE_CORE__FUNCTIONAL_H
+#ifndef CORE__FUNCTIONAL_H
+#define CORE__FUNCTIONAL_H
 
 #include "core/memory/utils.h"
 #include "core/strings/string.h"
@@ -22,13 +22,13 @@
 #include <cstdint>
 #include <cstdio>
 
-#define IG_FNV_HASH64_DEFAULT_OFFSET_BASIS 0xcbf29ce484222325
-#define IG_FNV_HASH64_DEFAULT_PRIME 0x00000100000001B3
+#define FNV_HASH64_DEFAULT_OFFSET_BASIS 0xcbf29ce484222325
+#define FNV_HASH64_DEFAULT_PRIME 0x00000100000001B3
 
-#define IG_FNV_HASH128_DEFAULT_OFFSET_BASIS 0x6c62272e07bb014262b821756295c58d
-#define IG_FNV_HASH128_DEFAULT_PRIME 0x0000000001000000000000000000013B
+#define FNV_HASH128_DEFAULT_OFFSET_BASIS 0x6c62272e07bb014262b821756295c58d
+#define FNV_HASH128_DEFAULT_PRIME 0x0000000001000000000000000000013B
 
-namespace Ignite {
+namespace blerg {
 
 // Fowler–Noll–Vo (FNV) is a non-cryptographic hash function created by Glenn Fowler, Landon
 // Curt Noll, and Kiem-Phong Vo.
@@ -38,12 +38,12 @@ namespace Ignite {
 //
 // - bytes: Byte data used to compute hash value.
 // - size: Number of bytes provided.
-// - hash: Offset basis (defaults to IG_FNV_HASH64_DEFAULT_OFFSET_BASIS).
-// - prime: Number to multiply each byte by (defaults to IG_FNV_HASH64_DEFAULT_PRIME).
+// - hash: Offset basis (defaults to FNV_HASH64_DEFAULT_OFFSET_BASIS).
+// - prime: Number to multiply each byte by (defaults to FNV_HASH64_DEFAULT_PRIME).
 // Returns: A 64-bit hash value computed using the FNV algorithm.
-inline constexpr uint64_t CalcFnvHash(const char* bytes, size_t size,
-                                      uint64_t hash  = IG_FNV_HASH64_DEFAULT_OFFSET_BASIS,
-                                      uint64_t prime = IG_FNV_HASH64_DEFAULT_PRIME)
+inline constexpr uint64_t calc_fnv_hash(const char* bytes, size_t size,
+                                        uint64_t hash  = FNV_HASH64_DEFAULT_OFFSET_BASIS,
+                                        uint64_t prime = FNV_HASH64_DEFAULT_PRIME)
 {
     for (size_t i = 0; i < size; i++) {
         hash ^= bytes[i];
@@ -52,54 +52,51 @@ inline constexpr uint64_t CalcFnvHash(const char* bytes, size_t size,
     return hash;
 }
 
-} // namespace Ignite
-
 template <typename T>
-struct IgHash {
-    IG_FORCE_INLINE constexpr size_t Hash(const T& val) const
+struct Hash {
+    FORCE_INLINE constexpr size_t hash(const T& val) const
     {
-        return Ignite::CalcFnvHash(Ignite::ByteCast(val), sizeof(T));
+        return blerg::calc_fnv_hash(blerg::byte_cast(val), sizeof(T));
     }
 };
 
 template <>
-struct IgHash<IgStringView> {
-    IG_FORCE_INLINE static constexpr uint64_t Hash(const IgStringView& str)
+struct Hash<StringView> {
+    FORCE_INLINE static constexpr uint64_t hash(const StringView& str)
     {
-        return Ignite::CalcFnvHash(str.Ptr, str.Size);
+        return blerg::calc_fnv_hash(str.data(), str.size());
     }
 };
 
 template <typename TAllocator, size_t TCapacityIncreaseIntervalSize>
-struct IgHash<IgString<TAllocator, TCapacityIncreaseIntervalSize>> {
-    IG_FORCE_INLINE static constexpr uint64_t Hash(const IgStringView& str)
+struct Hash<BasicString<char, TAllocator, TCapacityIncreaseIntervalSize>> {
+    FORCE_INLINE static constexpr uint64_t hash(const StringView& str)
     {
-        return Ignite::CalcFnvHash(str.Ptr, str.Size);
+        return blerg::calc_fnv_hash(str.data(), str.size());
     }
 };
 
 template <typename T>
-struct IgComparator {
-    IG_FORCE_INLINE static constexpr bool Compare(const T& lhs, const T& rhs)
+struct Comparator {
+    FORCE_INLINE static constexpr bool compare(const T& lhs, const T& rhs) { return lhs == rhs; }
+};
+
+template <>
+struct Comparator<const char*> {
+    FORCE_INLINE static constexpr bool compare(const char* lhs, const char* rhs)
     {
-        return lhs == rhs;
+        return blerg::cstr_compare(lhs, rhs, blerg::cstr_length(lhs));
     }
 };
 
 template <>
-struct IgComparator<const char*> {
-    IG_FORCE_INLINE static constexpr bool Compare(const char* lhs, const char* rhs)
+struct Comparator<char*> {
+    FORCE_INLINE static constexpr bool compare(char* lhs, char* rhs)
     {
-        return Ignite::CStrCompare(lhs, rhs, Ignite::CStrLength(lhs));
+        return blerg::cstr_compare(lhs, rhs, blerg::cstr_length(lhs));
     }
 };
 
-template <>
-struct IgComparator<char*> {
-    IG_FORCE_INLINE static constexpr bool Compare(char* lhs, char* rhs)
-    {
-        return Ignite::CStrCompare(lhs, rhs, Ignite::CStrLength(lhs));
-    }
-};
+} // namespace blerg
 
 #endif

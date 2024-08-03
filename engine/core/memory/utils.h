@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_MEMORY__UTILS_H
-#define IGNITE_CORE_MEMORY__UTILS_H
+#ifndef CORE_MEMORY__UTILS_H
+#define CORE_MEMORY__UTILS_H
 
 #include "core/defines.h"
 #include "core/type_traits.h"
@@ -22,10 +22,10 @@
 #include <new>
 #include <type_traits>
 
-namespace Ignite {
+namespace blerg {
 
 template <typename T>
-IG_FORCE_INLINE constexpr unsigned char* ByteCast(T& val)
+FORCE_INLINE constexpr unsigned char* byte_cast(T& val)
 {
     union {
         T* val;
@@ -35,7 +35,7 @@ IG_FORCE_INLINE constexpr unsigned char* ByteCast(T& val)
 }
 
 template <typename TTo, typename TFrom>
-IG_FORCE_INLINE constexpr TTo* ConstexprPtrCast(TFrom* val)
+FORCE_INLINE constexpr TTo* constexpr_ptr_cast(TFrom* val)
 {
     union {
         TFrom* from;
@@ -45,12 +45,12 @@ IG_FORCE_INLINE constexpr TTo* ConstexprPtrCast(TFrom* val)
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr typename std::remove_reference<T>::type&& Move(T&& lval)
+FORCE_INLINE constexpr typename std::remove_reference<T>::type&& move(T&& lval)
 {
     return static_cast<typename std::remove_reference<T>::type&&>(lval);
 }
 
-IG_FORCE_INLINE constexpr void* CopyBytes(void* dest, const void* src, size_t size)
+FORCE_INLINE constexpr void* copy_bytes(void* dest, const void* src, size_t size)
 {
     unsigned char* dest_bytes      = static_cast<unsigned char*>(dest);
     const unsigned char* src_bytes = static_cast<const unsigned char*>(src);
@@ -61,25 +61,25 @@ IG_FORCE_INLINE constexpr void* CopyBytes(void* dest, const void* src, size_t si
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void DefaultConstructItems(Iter begin, Iter end)
+FORCE_INLINE constexpr void default_construct_items(Iter begin, Iter end)
 {
     if constexpr (std::is_default_constructible_v<typename Iter::Type>) {
         for (Iter iter = begin; iter != end; iter++) {
-            new (iter.Ptr()) typename Iter::Type();
+            new (iter.ptr()) typename Iter::Type();
         }
     }
 }
 
 template <typename Iter, typename... _Args>
-IG_FORCE_INLINE constexpr void FillConstructItems(Iter begin, Iter end, const _Args&... args)
+FORCE_INLINE constexpr void fill_construct_items(Iter begin, Iter end, const _Args&... args)
 {
     for (Iter iter = begin; iter != end; iter++) {
-        new (iter.Ptr()) typename Iter::Type(args...);
+        new (iter.ptr()) typename Iter::Type(args...);
     }
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void Fill(Iter begin, Iter end, const typename Iter::Type& fill)
+FORCE_INLINE constexpr void fill(Iter begin, Iter end, const typename Iter::Type& fill)
 {
     for (Iter iter = begin; iter != end; iter++) {
         *iter = fill;
@@ -88,25 +88,25 @@ IG_FORCE_INLINE constexpr void Fill(Iter begin, Iter end, const typename Iter::T
 
 // Warning: If items are already initialized, make sure use
 template <typename Iter>
-IG_FORCE_INLINE constexpr void
-    CopyInitializerListItems(Iter begin, const std::initializer_list<typename Iter::Type>& list)
+FORCE_INLINE constexpr void
+    copy_initializer_list_items(Iter begin, const std::initializer_list<typename Iter::Type>& list)
 {
     using Type = typename Iter::Type;
     Iter iter  = begin;
     for (const Type& val : list) {
         if constexpr (std::is_move_constructible_v<Type>) {
-            new (iter.Ptr()) Type(val);
+            new (iter.ptr()) Type(val);
         }
         else {
-            *iter.Ptr() = val;
+            *iter.ptr() = val;
         }
         iter++;
     }
 }
 
 template <typename T, typename... _Args, size_t... Indices>
-IG_FORCE_INLINE constexpr void
-    ConstructArgsIndices(T& dest, TypeTraits::index_sequence<Indices...>, _Args&&... args)
+FORCE_INLINE constexpr void
+    construct_args_indices(T& dest, type_traits::index_sequence<Indices...>, _Args&&... args)
 {
     if constexpr (std::is_pointer<T>::value) {
         new (dest) typename std::remove_pointer<T>::type {(void(Indices), args)...};
@@ -117,7 +117,7 @@ IG_FORCE_INLINE constexpr void
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr void DefaultConstruct(T& obj)
+FORCE_INLINE constexpr void default_construct(T& obj)
 {
     if constexpr (std::is_pointer<T>::value) {
         new (obj) typename std::remove_pointer<T>::type();
@@ -128,7 +128,7 @@ IG_FORCE_INLINE constexpr void DefaultConstruct(T& obj)
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr void CopyConstruct(T& dest, const T& src)
+FORCE_INLINE constexpr void copy_construct(T& dest, const T& src)
 {
     if constexpr (std::is_pointer<T>::value) {
         new (dest) typename std::remove_pointer<T>::type(src);
@@ -139,67 +139,67 @@ IG_FORCE_INLINE constexpr void CopyConstruct(T& dest, const T& src)
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr void MoveConstruct(T& dest, T&& src)
+FORCE_INLINE constexpr void move_construct(T& dest, T&& src)
 {
     if constexpr (std::is_pointer<T>::value) {
-        new (dest) typename std::remove_pointer<T>::type(Ignite::Move(src));
+        new (dest) typename std::remove_pointer<T>::type(blerg::move(src));
     }
     else {
-        new (&dest) T(Ignite::Move(src));
+        new (&dest) T(blerg::move(src));
     }
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void CopyItems(Iter begin, Iter end, const typename Iter::Type* src)
+FORCE_INLINE constexpr void copy_items(Iter begin, Iter end, const typename Iter::Type* src)
 {
     using Type  = typename Iter::Type;
-    size_t size = end.Ptr() - begin.Ptr();
+    size_t size = end.ptr() - begin.ptr();
     Iter iter   = begin;
     for (size_t i = 0; i < size; i++, iter++) {
         if constexpr (std::is_copy_constructible_v<Type>) {
-            new (iter.Ptr()) Type(src[i]);
+            new (iter.ptr()) Type(src[i]);
         }
         else {
-            *iter.Ptr() = src[i];
+            *iter.ptr() = src[i];
         }
     }
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void MoveItems(Iter begin, Iter end, const typename Iter::Type* src)
+FORCE_INLINE constexpr void move_items(Iter begin, Iter end, const typename Iter::Type* src)
 {
     using Type  = typename Iter::Type;
-    size_t size = end.Ptr() - begin.Ptr();
+    size_t size = end.ptr() - begin.ptr();
     Iter iter   = begin;
     for (size_t i = 0; i < size; i++, iter++) {
         if constexpr (std::is_move_constructible_v<Type>) {
-            new (iter.Ptr()) Type(Ignite::Move(src[i]));
+            new (iter.ptr()) Type(blerg::move(src[i]));
         }
         else {
-            *iter.Ptr() = Ignite::Move(src[i]);
+            *iter.ptr() = blerg::move(src[i]);
         }
     }
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void ShiftItems(Iter begin, Iter end, Iter pos)
+FORCE_INLINE constexpr void shift_items(Iter begin, Iter end, Iter pos)
 {
     using Type  = typename Iter::Type;
-    size_t size = end.Ptr() - begin.Ptr();
-    if (pos.Ptr() < begin.Ptr()) {
+    size_t size = end.ptr() - begin.ptr();
+    if (pos.ptr() < begin.ptr()) {
         for (size_t i = 0; i < size; i++) {
-            new ((pos + i).Ptr()) Type(Ignite::Move(*(begin + i)));
+            new ((pos + i).ptr()) Type(blerg::move(*(begin + i)));
         }
     }
     else {
         for (int i = size - 1; i >= 0; --i) {
-            new ((pos + i).Ptr()) Type(Ignite::Move(*(begin + i)));
+            new ((pos + i).ptr()) Type(blerg::move(*(begin + i)));
         }
     }
 }
 
 template <typename Iter>
-IG_FORCE_INLINE constexpr void DestructItems(Iter begin, Iter end)
+FORCE_INLINE constexpr void destruct_items(Iter begin, Iter end)
 {
     using T = typename Iter::Type;
     if constexpr (std::is_destructible<T>::value) {
@@ -210,7 +210,7 @@ IG_FORCE_INLINE constexpr void DestructItems(Iter begin, Iter end)
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr void Destruct(T& obj)
+FORCE_INLINE constexpr void destruct(T& obj)
 {
     if constexpr (std::is_pointer<T>::value) {
         using Type = typename std::remove_pointer<T>::type;
@@ -222,13 +222,13 @@ IG_FORCE_INLINE constexpr void Destruct(T& obj)
 }
 
 template <typename T>
-IG_FORCE_INLINE constexpr void Swap(T&& obj1, T&& obj2)
+FORCE_INLINE constexpr void swap(T&& obj1, T&& obj2)
 {
-    T tmp = Ignite::Move(obj1);
-    obj1  = Ignite::Move(obj2);
-    obj2  = Ignite::Move(tmp);
+    T tmp = blerg::move(obj1);
+    obj1  = blerg::move(obj2);
+    obj2  = blerg::move(tmp);
 }
 
-} // namespace Ignite
+} // namespace blerg
 
 #endif

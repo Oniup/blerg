@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,130 +13,132 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_CONTAINERS__ARRAY_H
-#define IGNITE_CORE_CONTAINERS__ARRAY_H
+#ifndef CORE_CONTAINERS__ARRAY_H
+#define CORE_CONTAINERS__ARRAY_H
 
-#include "core/common.h"
 #include "core/containers/iterator.h"
+#include "core/defines.h"
 #include "core/limits.h"
+#include "core/memory/allocator.h"
 #include "core/memory/utils.h"
 #include <cstdlib>
 
-template <typename T, typename TAllocator, size_t TCapacityIncreaseIntervalSize>
-struct IgArray {
+namespace blerg {
+
+template <typename T, typename TAllocator = HeapAllocator,
+          size_t TCapacityIncreaseIntervalSize = DEFAULT_CAPACITY_INTERVAL>
+struct Array {
     using Type          = T;
     using Allocation    = typename TAllocator::template Allocation<T>;
-    using Iterator      = IgPackedIterator<T, IgArray>;
-    using ConstIterator = IgConstPackedIterator<T, IgArray>;
+    using Iterator      = PackedIterator<T, Array>;
+    using ConstIterator = ConstPackedIterator<T, Array>;
     static constexpr size_t CapacityIncreaseIntervalSize = TCapacityIncreaseIntervalSize;
-    static constexpr size_t NoPos                        = IgNumericLimits<size_t>::Max();
+    static constexpr size_t NoPos                        = NumericLimits<size_t>::max();
 
-    size_t Size          = 0;
-    Allocation Allocator = {};
+    constexpr Array() = default;
 
-    constexpr IgArray() = default;
-
-    constexpr IgArray(size_t size)
-          : Size(size)
+    constexpr Array(size_t size)
+          : _size(size)
     {
-        size_t capacity = Allocator.CalcRequiredCapacitySize(size, CapacityIncreaseIntervalSize);
-        Allocator.Allocate(capacity);
-        Ignite::DefaultConstructItems(Begin(), End());
+        size_t capacity =
+            _allocator.calc_required_capacity_size(size, CapacityIncreaseIntervalSize);
+        _allocator.allocate(capacity);
+        blerg::default_construct_items(begin(), end());
     }
 
-    constexpr IgArray(const std::initializer_list<T>& list)
-          : IgArray(list.size())
+    constexpr Array(const std::initializer_list<T>& list)
+          : Array(list.size())
     {
-        Ignite::CopyInitializerListItems(Begin(), list);
+        blerg::copy_initializer_list_items(begin(), list);
     }
 
-    constexpr IgArray(const IgArray& array)
-          : Size(array.Size)
+    constexpr Array(const Array& array)
+          : _size(array._size)
     {
-        Allocator.Allocate(array.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), array.Allocator.Ptr);
+        _allocator.allocate(array._allocator.capacity);
+        blerg::copy_items(begin(), end(), array._allocator.ptr);
     }
 
-    template <typename _OtherAllocator>
-    constexpr IgArray(const IgArray<T, _OtherAllocator>& array)
-          : Size(array.Size)
+    template <typename TOtherAllocator>
+    constexpr Array(const Array<T, TOtherAllocator>& array)
+          : _size(array._size)
     {
-        Allocator.Allocate(array.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), array.Allocator.Ptr);
+        _allocator.allocate(array._allocator.capacity);
+        blerg::copy_items(begin(), end(), array._allocator.ptr);
     }
 
-    constexpr IgArray(IgArray&& array)
+    constexpr Array(Array&& array)
     {
-        Allocator = Ignite::Move(array.Allocator);
-        Size      = Ignite::Move(array.Size);
+        _allocator = blerg::move(array._allocator);
+        _size      = blerg::move(array._size);
 
-        array.Allocator.SetToNullptr();
-        array.Size = 0;
+        array._allocator.set_to_nullptr();
+        array._size = 0;
     }
 
-    ~IgArray() { Destroy(); }
+    ~Array() { destroy(); }
 
-    constexpr Iterator Begin() { return Iterator(this, 0); }
-    constexpr Iterator End() { return Iterator(this, Size); }
-    constexpr ConstIterator Begin() const { return ConstIterator(const_cast<IgArray*>(this), 0); }
-    constexpr ConstIterator End() const { return ConstIterator(const_cast<IgArray*>(this), Size); }
-    constexpr Iterator begin() { return Begin(); }
-    constexpr Iterator end() { return End(); }
-    constexpr ConstIterator begin() const { return Begin(); }
-    constexpr ConstIterator end() const { return End(); }
+    constexpr Iterator begin() { return Iterator(this, 0); }
+    constexpr Iterator end() { return Iterator(this, _size); }
+    constexpr ConstIterator begin() const { return ConstIterator(const_cast<Array*>(this), 0); }
+    constexpr ConstIterator end() const { return ConstIterator(const_cast<Array*>(this), _size); }
 
-    constexpr T* Data() { return Allocator.Ptr; }
-    constexpr const T* Data() const { return Allocator.Ptr; }
-    constexpr size_t Capacity() const { return Allocator.Capacity; }
+    constexpr T* data() { return _allocator.ptr; }
+    constexpr const T* data() const { return _allocator.ptr; }
+    constexpr size_t size() const { return _size; }
+    constexpr size_t capacity() const { return _allocator.capacity; }
 
-    constexpr bool IsEmpty() const { return Allocator.IsEmpty() || (Size == 0 || Size == NoPos); }
-    constexpr bool IsAllocatorEmpty() const { return Allocator.IsEmpty(); }
-
-    constexpr T& First() { return Allocator.Ptr[0]; }
-    constexpr const T& First() const { return Allocator.Ptr[0]; }
-    constexpr T& Last() { return Allocator.Ptr[Size - 1]; }
-    constexpr const T& Last() const { return Allocator.Ptr[Size - 1]; }
-
-    template <typename _OtherAllocator>
-    constexpr IgArray& operator=(const IgArray<T, _OtherAllocator>& array)
+    constexpr bool is_empty() const
     {
-        Ignite::DestructItems(Begin(), End());
-        Size = array.Size;
+        return _allocator.is_empty() || (_size == 0 || _size == NoPos);
+    }
+    constexpr bool is_allocator_empty() const { return _allocator.is_empty(); }
 
-        Allocator.ReAllocate(array.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), array.Allocator.Ptr);
+    constexpr T& first() { return _allocator.ptr[0]; }
+    constexpr const T& first() const { return _allocator.ptr[0]; }
+    constexpr T& last() { return _allocator.ptr[_size - 1]; }
+    constexpr const T& last() const { return _allocator.ptr[_size - 1]; }
+
+    template <typename TOtherAllocator>
+    constexpr Array& operator=(const Array<T, TOtherAllocator>& array)
+    {
+        blerg::destruct_items(begin(), end());
+        _size = array._size;
+
+        _allocator.reallocate(array._allocator.capacity);
+        blerg::copy_items(begin(), end(), array._allocator.ptr);
         return *this;
     }
 
-    constexpr IgArray& operator=(const IgArray& array)
+    constexpr Array& operator=(const Array& array)
     {
-        Ignite::DestructItems(Begin(), End());
-        Size = array.Size;
+        blerg::destruct_items(begin(), end());
+        _size = array._size;
 
-        Allocator.ReAllocate(array.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), array.Allocator.Ptr);
+        _allocator.reallocate(array._allocator.capacity);
+        blerg::copy_items(begin(), end(), array._allocator.ptr);
         return *this;
     }
 
-    constexpr IgArray& operator=(IgArray&& array)
+    constexpr Array& operator=(Array&& array)
     {
-        Ignite::DestructItems(Begin(), End());
-        Allocator = Ignite::Move(array.Allocator);
-        Size      = Ignite::Move(array.Size);
+        blerg::destruct_items(begin(), end());
+        _allocator = blerg::move(array._allocator);
+        _size      = blerg::move(array._size);
 
-        array.Allocator.SetToNullptr();
-        array.Size = 0;
+        array._allocator.set_to_nullptr();
+        array._size = 0;
         return *this;
     }
 
-    constexpr bool operator!=(const IgArray& array) const { return !(*this == array); }
-    constexpr bool operator==(const IgArray& array) const
+    constexpr bool operator!=(const Array& array) const { return !(*this == array); }
+    constexpr bool operator==(const Array& array) const
     {
-        if (Size != array.Size) {
+        if (_size != array._size) {
             return false;
         }
-        for (size_t i = 0; i < Size; i++) {
-            if (Allocator.Ptr[i] != array[i]) {
+        for (size_t i = 0; i < _size; i++) {
+            if (_allocator.ptr[i] != array[i]) {
                 return false;
             }
         }
@@ -145,267 +147,273 @@ struct IgArray {
 
     constexpr T& operator[](size_t index)
     {
-        IG_BASIC_ASSERT(index > Size, "Out of range index");
-        return Allocator.Ptr[index];
+        BASIC_ASSERT(index > _size, "Out of range index");
+        return _allocator.ptr[index];
     }
 
     constexpr const T& operator[](size_t index) const
     {
-        IG_BASIC_ASSERT(index > Size, "Out of range index");
-        return Allocator.Ptr[index];
+        BASIC_ASSERT(index > _size, "Out of range index");
+        return _allocator.ptr[index];
     }
 
-    constexpr void Clear()
+    constexpr void clear()
     {
-        Ignite::DestructItems(Begin(), End());
-        Size = 0;
+        blerg::destruct_items(begin(), end());
+        _size = 0;
     }
 
-    constexpr void Destroy()
+    constexpr void destroy()
     {
-        Clear();
-        if (Allocator.Ptr != nullptr) {
-            Allocator.Free();
+        clear();
+        if (_allocator.ptr != nullptr) {
+            _allocator.free();
         }
     }
 
-    constexpr void Resize(size_t size)
+    constexpr void resize(size_t size)
     {
-        if (size < Size) {
-            Ignite::DestructItems(Begin() + size, End());
+        if (size < _size) {
+            blerg::destruct_items(begin() + size, end());
         }
         else {
-            ReserveToFit(size);
+            reserve_to_fit(size);
         }
-        Size = size;
+        _size = size;
     }
 
     // WARNING: This does not call destructors for existing elements in array.
-    constexpr void ReserveToFit(size_t size)
+    constexpr void reserve_to_fit(size_t size)
     {
-        if (size > Allocator.Capacity) {
+        if (size > _allocator.capacity) {
             size_t capacity =
-                Allocator.CalcRequiredCapacitySize(size, CapacityIncreaseIntervalSize);
-            Reserve(capacity);
+                _allocator.calc_required_capacity_size(size, CapacityIncreaseIntervalSize);
+            reserve(capacity);
         }
     }
 
     // WARNING: This does not call destructors for existing elements in array.
-    constexpr void Reserve(size_t capacity) { Allocator.ReAllocate(capacity); }
+    constexpr void reserve(size_t capacity) { _allocator.reallocate(capacity); }
 
-    constexpr void PushBack(const T& val)
+    constexpr void push_back(const T& val)
     {
-        size_t pos = Size;
-        Resize(Size + 1);
+        size_t pos = _size;
+        resize(_size + 1);
         if constexpr (!std::is_pointer_v<T>) {
-            Ignite::CopyConstruct(*(Allocator.Ptr + pos), val);
+            blerg::copy_construct(*(_allocator.ptr + pos), val);
         }
         else {
-            Allocator.Ptr[pos] = val;
+            _allocator.ptr[pos] = val;
         }
     }
 
-    constexpr void PushBack(T&& val)
+    constexpr void push_back(T&& val)
     {
-        size_t pos = Size;
-        Resize(Size + 1);
+        size_t pos = _size;
+        resize(_size + 1);
         if constexpr (!std::is_pointer_v<T>) {
-            Ignite::MoveConstruct(*(Allocator.Ptr + pos), Ignite::Move(val));
+            blerg::move_construct(*(_allocator.ptr + pos), blerg::move(val));
         }
         else {
-            Allocator.Ptr[pos] = val;
+            _allocator.ptr[pos] = val;
         }
     }
 
-    template <typename _OtherAllocator>
-    constexpr void PushBack(const IgArray<T, _OtherAllocator>& array)
+    template <typename TOtherAllocator>
+    constexpr void push_back(const Array<T, TOtherAllocator>& array)
     {
-        size_t pos = Size;
-        Resize(Size + array.Size);
-        Iterator offset = Begin() + pos;
-        Ignite::CopyItems(offset, End(), array.Allocator.Ptr);
+        size_t pos = _size;
+        resize(_size + array._size);
+        Iterator offset = begin() + pos;
+        blerg::copy_items(offset, end(), array._allocator.ptr);
     }
 
-    constexpr void PushBack(const std::initializer_list<T>& list)
+    constexpr void push_back(const std::initializer_list<T>& list)
     {
-        size_t old_size = Size;
-        Resize(Size + list.size());
-        Ignite::CopyInitializerListItems(Begin() + old_size, list);
+        size_t old_size = _size;
+        resize(_size + list.size());
+        blerg::copy_initializer_list_items(begin() + old_size, list);
     }
 
-    constexpr void PushFront(const T& val)
+    constexpr void push_front(const T& val)
     {
-        size_t old_size = Size;
-        Resize(Size + 1);
-        Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + 1);
+        size_t old_size = _size;
+        resize(_size + 1);
+        blerg::shift_items(begin(), begin() + old_size, begin() + 1);
         if constexpr (!std::is_pointer_v<T>) {
-            Ignite::CopyConstruct(Allocator.Ptr[0], val);
+            blerg::copy_construct(_allocator.ptr[0], val);
         }
         else {
-            Allocator.Ptr[0] = val;
+            _allocator.ptr[0] = val;
         }
     }
 
-    constexpr void PushFront(T&& val)
+    constexpr void push_front(T&& val)
     {
-        size_t old_size = Size;
-        Resize(Size + 1);
-        Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + 1);
+        size_t old_size = _size;
+        resize(_size + 1);
+        blerg::shift_items(begin(), begin() + old_size, begin() + 1);
         if constexpr (!std::is_pointer_v<T>) {
-            Ignite::MoveConstruct(*Allocator.Ptr, Ignite::Move(val));
+            blerg::move_construct(*_allocator.ptr, blerg::move(val));
         }
         else {
-            Allocator.Ptr[0] = Ignite::Move(val);
+            _allocator.ptr[0] = blerg::move(val);
         }
     }
 
-    template <typename _OtherAllocator>
-    constexpr void PushFront(const IgArray<T, _OtherAllocator>& arr)
+    template <typename TOtherAllocator>
+    constexpr void PushFront(const Array<T, TOtherAllocator>& arr)
     {
-        size_t old_size = Size;
-        Resize(Size + arr.Size);
-        Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + arr.Size);
-        Ignite::CopyItems(Begin(), Begin() + arr.Size, arr.Allocator.Ptr);
+        size_t old_size = _size;
+        resize(_size + arr._size);
+        blerg::shift_items(begin(), begin() + old_size, begin() + arr._size);
+        blerg::copy_items(begin(), begin() + arr._size, arr._allocator.ptr);
     }
 
-    constexpr void PushFront(const std::initializer_list<T>& list)
+    constexpr void push_front(const std::initializer_list<T>& list)
     {
-        size_t old_size = Size;
-        Resize(Size + list.size());
-        Ignite::ShiftItems(Begin(), Begin() + old_size, Begin() + list.size());
-        Ignite::CopyInitializerListItems(Begin() + old_size, list);
+        size_t old_size = _size;
+        resize(_size + list.size());
+        blerg::shift_items(begin(), begin() + old_size, begin() + list.size());
+        blerg::copy_initializer_list_items(begin() + old_size, list);
     }
 
-    constexpr void Insert(Iterator pos, T&& val)
+    constexpr void insert(Iterator pos, T&& val)
     {
-        if (pos == End()) {
-            PushBack(val);
+        if (pos == end()) {
+            push_back(val);
         }
-        else if (pos == Begin()) {
-            PushFront(val);
+        else if (pos == begin()) {
+            push_front(val);
         }
         else {
-            size_t old_size = Size;
-            Resize(Size + 1);
-            Ignite::ShiftItems(pos, Begin() + old_size, pos + 1);
+            size_t old_size = _size;
+            resize(_size + 1);
+            blerg::shift_items(pos, begin() + old_size, pos + 1);
             if constexpr (!std::is_same_v<T, void*>) {
-                Ignite::MoveConstruct(*pos, Ignite::Move(val));
+                blerg::move_construct(*pos, blerg::move(val));
             }
             else {
-                *pos = Ignite::Move(val);
+                *pos = blerg::move(val);
             }
         }
     }
 
-    template <typename _OtherAllocator>
-    constexpr void Insert(Iterator pos, const IgArray<T, _OtherAllocator>& arr)
+    template <typename TOtherAllocator>
+    constexpr void insert(Iterator pos, const Array<T, TOtherAllocator>& arr)
     {
-        if (pos == End()) {
-            PushBack(arr);
+        if (pos == end()) {
+            push_back(arr);
         }
-        else if (pos == Begin()) {
-            PushFront(arr);
+        else if (pos == begin()) {
+            push_front(arr);
         }
         else {
-            size_t old_size = Size;
-            Resize(Size + arr.Size);
-            Ignite::ShiftItems(pos, Begin() + old_size, pos + arr.Size);
-            Ignite::CopyItems(pos, pos + arr.Size, arr.Allocator.Ptr);
+            size_t old_size = _size;
+            resize(_size + arr._size);
+            blerg::shift_items(pos, begin() + old_size, pos + arr._size);
+            blerg::copy_items(pos, pos + arr._size, arr._allocator.ptr);
         }
     }
 
-    constexpr void Insert(Iterator pos, const std::initializer_list<T>& list)
+    constexpr void insert(Iterator pos, const std::initializer_list<T>& list)
     {
-        if (pos == End()) {
-            PushBack(list);
+        if (pos == end()) {
+            push_back(list);
         }
-        else if (pos == Begin()) {
-            PushFront(list);
+        else if (pos == begin()) {
+            push_front(list);
         }
         else {
-            size_t old_size = Size;
-            Resize(Size + list.size());
-            Ignite::ShiftItems(pos, Begin() + old_size, pos + list.size());
-            Ignite::CopyInitializerListItems(pos, list);
+            size_t old_size = _size;
+            resize(_size + list.size());
+            blerg::shift_items(pos, begin() + old_size, pos + list.size());
+            blerg::copy_initializer_list_items(pos, list);
         }
     }
 
-    constexpr void PopBack(size_t size = 1)
+    constexpr void pop_back(size_t size = 1)
     {
         if (size == 0) {
             return;
         }
-        if (Size - size < 1) {
-            Clear();
+        if (_size - size < 1) {
+            clear();
         }
         else {
-            Ignite::DestructItems(End() - size, End());
-            Resize(Size - size);
+            blerg::destruct_items(end() - size, end());
+            resize(_size - size);
         }
     }
 
-    constexpr void PopFront(size_t size = 1)
+    constexpr void pop_front(size_t size = 1)
     {
         if (size == 0) {
             return;
         }
-        if (Size - size < 1) {
-            Clear();
+        if (_size - size < 1) {
+            clear();
         }
         else {
-            Ignite::DestructItems(Begin(), Begin() + size);
-            Ignite::ShiftItems(Begin() + size, End(), Begin());
-            Resize(Size - size);
+            blerg::destruct_items(begin(), begin() + size);
+            blerg::shift_items(begin() + size, end(), begin());
+            resize(_size - size);
         }
     }
 
-    constexpr void Erase(Iterator begin, Iterator end)
+    constexpr void erase(Iterator begin, Iterator end)
     {
-        size_t size = end.Ptr() - begin.Ptr();
+        size_t size = end.ptr() - begin.ptr();
         if (size == 0) {
             return;
         }
-        if (Size - size < 1) {
-            Clear();
+        if (_size - size < 1) {
+            clear();
         }
         else {
-            Ignite::DestructItems(begin, end);
-            Ignite::ShiftItems(end, this->End(), begin);
-            Resize(Size - size);
+            blerg::destruct_items(begin, end);
+            blerg::shift_items(end, this->end(), begin);
+            resize(_size - size);
         }
     }
 
-    constexpr bool Erase(const T& val)
+    constexpr bool erase(const T& val)
     {
-        size_t offset = Find(val);
+        size_t offset = find(val);
         if (offset == NoPos) {
             return false;
         }
-        Erase(Begin() + offset, Begin() + offset + 1);
+        erase(begin() + offset, begin() + offset + 1);
         return true;
     }
 
-    constexpr void Erase(Iterator pos) { PopSlice(pos, pos + 1); }
+    constexpr void erase(Iterator pos) { erase(pos, pos + 1); }
 
-    constexpr size_t Find(const T& val) const
+    constexpr size_t find(const T& val) const
     {
-        for (size_t i = 0; i < Size; ++i) {
-            if (Allocator.Ptr[i] == val) {
+        for (size_t i = 0; i < _size; ++i) {
+            if (_allocator.ptr[i] == val) {
                 return i;
             }
         }
         return NoPos;
     }
 
-    constexpr size_t FindLast(const T& val) const
+    constexpr size_t find_last(const T& val) const
     {
-        for (size_t i = Size - 1; i > 0; --i) {
-            if (Allocator.Ptr[i] == val) {
+        for (size_t i = _size - 1; i > 0; --i) {
+            if (_allocator.ptr[i] == val) {
                 return i;
             }
         }
         return NoPos;
     }
+
+private:
+    size_t _size          = 0;
+    Allocation _allocator = {};
 };
+
+} // namespace blerg
 
 #endif

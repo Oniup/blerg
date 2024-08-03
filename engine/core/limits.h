@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/ignite_engine)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,78 +13,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE__LIMITS_H
-#define IGNITE_CORE__LIMITS_H
+#ifndef CORE__LIMITS_H
+#define CORE__LIMITS_H
 
 #include <cfloat>
 #include <climits>
 #include <cstdint>
 #include <cstdio>
 
+namespace blerg {
+
 template <typename _Primitive>
-struct IgNumericLimits {
-    static constexpr _Primitive Max();
-    static constexpr _Primitive Min();
+struct NumericLimits {
+    static constexpr _Primitive max();
+    static constexpr _Primitive min();
 };
 
 template <>
-struct IgNumericLimits<int8_t> {
-    static constexpr int8_t Max() { return (int8_t)INT8_MAX; }
-    static constexpr int8_t Min() { return (int8_t)INT8_MIN; }
+struct NumericLimits<int8_t> {
+    static constexpr int8_t max() { return (int8_t)INT8_MAX; }
+    static constexpr int8_t min() { return (int8_t)INT8_MIN; }
 };
 
 template <>
-struct IgNumericLimits<int16_t> {
-    static constexpr int16_t Max() { return (int16_t)INT16_MAX; }
-    static constexpr int16_t Min() { return (int16_t)INT16_MIN; }
+struct NumericLimits<int16_t> {
+    static constexpr int16_t max() { return (int16_t)INT16_MAX; }
+    static constexpr int16_t min() { return (int16_t)INT16_MIN; }
 };
 
 template <>
-struct IgNumericLimits<int32_t> {
-    static constexpr int32_t Max() { return (int32_t)INT32_MAX; }
-    static constexpr int32_t Min() { return (int32_t)INT32_MIN; }
+struct NumericLimits<int32_t> {
+    static constexpr int32_t max() { return (int32_t)INT32_MAX; }
+    static constexpr int32_t min() { return (int32_t)INT32_MIN; }
 };
 
 template <>
-struct IgNumericLimits<int64_t> {
-    static constexpr int64_t Max() { return (int64_t)INT64_MAX; }
-    static constexpr int64_t Min() { return (int64_t)INT64_MIN; }
+struct NumericLimits<int64_t> {
+    static constexpr int64_t max() { return (int64_t)INT64_MAX; }
+    static constexpr int64_t min() { return (int64_t)INT64_MIN; }
 };
 
 template <>
-struct IgNumericLimits<uint8_t> {
-    static constexpr uint8_t Max() { return (uint8_t)UINT8_MAX; }
-    static constexpr uint8_t Min() { return 0; }
+struct NumericLimits<uint8_t> {
+    static constexpr uint8_t max() { return (uint8_t)UINT8_MAX; }
+    static constexpr uint8_t min() { return 0; }
 };
 
 template <>
-struct IgNumericLimits<uint16_t> {
-    static constexpr uint16_t Max() { return (uint16_t)UINT16_MAX; }
-    static constexpr uint16_t Min() { return 0; }
+struct NumericLimits<uint16_t> {
+    static constexpr uint16_t max() { return (uint16_t)UINT16_MAX; }
+    static constexpr uint16_t min() { return 0; }
 };
 
 template <>
-struct IgNumericLimits<uint32_t> {
-    static constexpr uint32_t Max() { return (uint32_t)UINT32_MAX; }
-    static constexpr uint32_t Min() { return 0; }
+struct NumericLimits<uint32_t> {
+    static constexpr uint32_t max() { return (uint32_t)UINT32_MAX; }
+    static constexpr uint32_t min() { return 0; }
 };
 
 template <>
-struct IgNumericLimits<uint64_t> {
-    static constexpr uint64_t Max() { return (uint64_t)UINT64_MAX; }
-    static constexpr uint64_t Min() { return 0; }
+struct NumericLimits<uint64_t> {
+    static constexpr uint64_t max() { return (uint64_t)UINT64_MAX; }
+    static constexpr uint64_t min() { return 0; }
 };
 
 template <>
-struct IgNumericLimits<float> {
-    static constexpr float Max() { return (float)FLT_MAX; }
-    static constexpr float Min() { return (float)FLT_MIN; }
+struct NumericLimits<float> {
+    static constexpr float max() { return (float)FLT_MAX; }
+    static constexpr float min() { return (float)FLT_MIN; }
 };
 
 template <>
-struct IgNumericLimits<double> {
-    static constexpr double Max() { return (double)DBL_MAX; }
-    static constexpr double Min() { return (double)DBL_MIN; }
+struct NumericLimits<double> {
+    static constexpr double max() { return (double)DBL_MAX; }
+    static constexpr double min() { return (double)DBL_MIN; }
 };
+
+} // namespace blerg
 
 #endif

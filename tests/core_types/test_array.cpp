@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/ignite_engine)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,189 +16,191 @@
 #include "core/containers/array.h"
 #include <gtest/gtest.h>
 
-TEST(IgArrayTest, DefaultConstructorTest)
+using namespace blerg;
+
+TEST(ArrayTest, DefaultConstructorTest)
 {
-    IgArray<int> array;
-    ASSERT_EQ(array.Size, 0);
-    ASSERT_TRUE(array.IsEmpty());
+    Array<int> array;
+    ASSERT_EQ(array.size(), 0);
+    ASSERT_TRUE(array.is_empty());
 }
 
-TEST(IgArrayTest, SizeConstructorTest)
+TEST(ArrayTest, SizeConstructorTest)
 {
-    IgArray<int> array(10);
-    ASSERT_EQ(array.Size, 10);
+    Array<int> array(10);
+    ASSERT_EQ(array.size(), 10);
 }
 
-TEST(IgArrayTest, InitializerListConstructorTest)
+TEST(ArrayTest, InitializerListConstructorTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    ASSERT_EQ(array.Size, 5);
-    for (size_t i = 0; i < array.Size; ++i) {
+    Array<int> array({1, 2, 3, 4, 5});
+    ASSERT_EQ(array.size(), 5);
+    for (size_t i = 0; i < array.size(); ++i) {
         ASSERT_EQ(array[i], i + 1);
     }
 }
 
-TEST(IgArrayTest, CopyConstructorTest)
+TEST(ArrayTest, CopyConstructorTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> copy(array);
-    ASSERT_EQ(copy.Size, array.Size);
-    for (size_t i = 0; i < copy.Size; ++i) {
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> copy(array);
+    ASSERT_EQ(copy.size(), array.size());
+    for (size_t i = 0; i < copy.size(); ++i) {
         ASSERT_EQ(copy[i], array[i]);
     }
 }
 
-TEST(IgArrayTest, MoveConstructorTest)
+TEST(ArrayTest, MoveConstructorTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> moved(Ignite::Move(array));
-    ASSERT_EQ(moved.Size, 5);
-    for (size_t i = 0; i < moved.Size; ++i) {
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> moved(blerg::move(array));
+    ASSERT_EQ(moved.size(), 5);
+    for (size_t i = 0; i < moved.size(); ++i) {
         ASSERT_EQ(moved[i], i + 1);
     }
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.size(), 0);
 }
 
-TEST(IgArrayTest, CopyAssignmentTest)
+TEST(ArrayTest, CopyAssignmentTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> copy;
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> copy;
     copy = array;
-    ASSERT_EQ(copy.Size, array.Size);
-    for (size_t i = 0; i < copy.Size; ++i) {
+    ASSERT_EQ(copy.size(), array.size());
+    for (size_t i = 0; i < copy.size(); ++i) {
         ASSERT_EQ(copy[i], array[i]);
     }
 }
 
-TEST(IgArrayTest, MoveAssignmentTest)
+TEST(ArrayTest, MoveAssignmentTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> moved;
-    moved = Ignite::Move(array);
-    ASSERT_EQ(moved.Size, 5);
-    for (size_t i = 0; i < moved.Size; ++i) {
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> moved;
+    moved = blerg::move(array);
+    ASSERT_EQ(moved.size(), 5);
+    for (size_t i = 0; i < moved.size(); ++i) {
         ASSERT_EQ(moved[i], i + 1);
     }
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.size(), 0);
 }
 
-TEST(IgArrayTest, EqualityTest)
+TEST(ArrayTest, EqualityTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> copy(array);
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> copy(array);
     ASSERT_TRUE(array == copy);
 }
 
-TEST(IgArrayTest, InequalityTest)
+TEST(ArrayTest, InequalityTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    IgArray<int> different({1, 2, 3, 4, 6});
+    Array<int> array({1, 2, 3, 4, 5});
+    Array<int> different({1, 2, 3, 4, 6});
     ASSERT_TRUE(array != different);
 }
 
-TEST(IgArrayTest, IndexOperatorTest)
+TEST(ArrayTest, IndexOperatorTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
+    Array<int> array({1, 2, 3, 4, 5});
     ASSERT_EQ(array[0], 1);
     ASSERT_EQ(array[4], 5);
 }
 
-TEST(IgArrayTest, ClearTest)
+TEST(ArrayTest, ClearTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.Clear();
-    ASSERT_EQ(array.Size, 0);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.clear();
+    ASSERT_EQ(array.size(), 0);
 }
 
-TEST(IgArrayTest, DestroyTest)
+TEST(ArrayTest, DestroyTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.~IgArray();
+    Array<int> array({1, 2, 3, 4, 5});
+    array.~Array();
     // Since the destructor calls Free, which sets Size to 0, we can check that here
-    ASSERT_EQ(array.Size, 0);
+    ASSERT_EQ(array.size(), 0);
 }
 
-TEST(IgArrayTest, ResizeTest)
+TEST(ArrayTest, ResizeTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.Resize(3);
-    ASSERT_EQ(array.Size, 3);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.resize(3);
+    ASSERT_EQ(array.size(), 3);
 }
 
-TEST(IgArrayTest, ReserveToFitTest)
+TEST(ArrayTest, ReserveToFitTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.ReserveToFit(10);
-    ASSERT_GE(array.Capacity(), 10);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.reserve_to_fit(10);
+    ASSERT_GE(array.capacity(), 10);
 }
 
-TEST(IgArrayTest, ReserveTest)
+TEST(ArrayTest, ReserveTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.Reserve(10);
-    ASSERT_EQ(array.Capacity(), 10);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.reserve(10);
+    ASSERT_EQ(array.capacity(), 10);
 }
 
-TEST(IgArrayTest, PushBackTest)
+TEST(ArrayTest, PushBackTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.PushBack(6);
-    ASSERT_EQ(array.Size, 6);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.push_back(6);
+    ASSERT_EQ(array.size(), 6);
     ASSERT_EQ(array[5], 6);
 }
 
-TEST(IgArrayTest, PushFrontTest)
+TEST(ArrayTest, PushFrontTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.PushFront(0);
-    ASSERT_EQ(array.Size, 6);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.push_front(0);
+    ASSERT_EQ(array.size(), 6);
     ASSERT_EQ(array[0], 0);
 }
 
-TEST(IgArrayTest, InsertTest)
+TEST(ArrayTest, InsertTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.Insert(array.Begin() + 2, 99);
-    ASSERT_EQ(array.Size, 6);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.insert(array.begin() + 2, 99);
+    ASSERT_EQ(array.size(), 6);
     ASSERT_EQ(array[2], 99);
 }
 
-TEST(IgArrayTest, PopBackTest)
+TEST(ArrayTest, PopBackTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.PopBack();
-    ASSERT_EQ(array.Size, 4);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.pop_back();
+    ASSERT_EQ(array.size(), 4);
     ASSERT_EQ(array[3], 4);
 }
 
-TEST(IgArrayTest, PopFrontTest)
+TEST(ArrayTest, PopFrontTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.PopFront();
-    ASSERT_EQ(array.Size, 4);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.pop_front();
+    ASSERT_EQ(array.size(), 4);
     ASSERT_EQ(array[0], 2);
 }
 
-TEST(IgArrayTest, EraseTest)
+TEST(ArrayTest, EraseTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    array.Erase(array.Begin() + 2, array.Begin() + 4);
-    ASSERT_EQ(array.Size, 3);
+    Array<int> array({1, 2, 3, 4, 5});
+    array.erase(array.begin() + 2, array.begin() + 4);
+    ASSERT_EQ(array.size(), 3);
     ASSERT_EQ(array[0], 1);
     ASSERT_EQ(array[1], 2);
     ASSERT_EQ(array[2], 5);
 }
 
-TEST(IgArrayTest, FindTest)
+TEST(ArrayTest, FindTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    ASSERT_EQ(array.Find(3), 2);
-    ASSERT_EQ(array.Find(10), IgArray<int>::NoPos);
+    Array<int> array({1, 2, 3, 4, 5});
+    ASSERT_EQ(array.find(3), 2);
+    ASSERT_EQ(array.find(10), Array<int>::NoPos);
 }
 
-TEST(IgArrayTest, FindLastTest)
+TEST(ArrayTest, FindLastTest)
 {
-    IgArray<int> array({1, 2, 3, 4, 5});
-    ASSERT_EQ(array.FindLast(3), 2);
-    ASSERT_EQ(array.FindLast(10), IgArray<int>::NoPos);
+    Array<int> array({1, 2, 3, 4, 5});
+    ASSERT_EQ(array.find_last(3), 2);
+    ASSERT_EQ(array.find_last(10), Array<int>::NoPos);
 }

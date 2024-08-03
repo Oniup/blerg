@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,117 +13,121 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_MEMORY__ALLOCATOR_H
-#define IGNITE_CORE_MEMORY__ALLOCATOR_H
+#ifndef CORE_MEMORY__ALLOCATOR_H
+#define CORE_MEMORY__ALLOCATOR_H
 
 #include "core/defines.h"
 #include "math/math.h"
 #include <cstdio>
 #include <cstdlib>
 
-struct IgHeapAllocation {
+namespace blerg {
+
+struct HeapAllocator {
     template <typename T>
     struct Allocation {
         using Type = T;
 
-        size_t Capacity = 0;
-        T* Ptr          = nullptr;
+        size_t capacity = 0;
+        T* ptr          = nullptr;
 
-        IG_FORCE_INLINE T& operator*() const { return *Ptr; }
-        IG_FORCE_INLINE T& operator[](size_t index) { return Ptr[index]; }
-        IG_FORCE_INLINE const T& operator[](size_t index) const { return Ptr[index]; }
+        FORCE_INLINE T& operator*() const { return *ptr; }
+        FORCE_INLINE T& operator[](size_t index) { return ptr[index]; }
+        FORCE_INLINE const T& operator[](size_t index) const { return ptr[index]; }
 
-        IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
+        FORCE_INLINE constexpr size_t calc_required_capacity_size(size_t fit_size,
                                                                   size_t capacity_interval) const
         {
-            size_t interval_count = (size_t)Ignite::RoundUp((double)fit_size / capacity_interval);
+            size_t interval_count = (size_t)blerg::round_up((double)fit_size / capacity_interval);
             if (interval_count > 0) {
                 return capacity_interval * interval_count;
             }
             return fit_size;
         }
 
-        IG_FORCE_INLINE void Allocate(size_t capacity)
+        FORCE_INLINE void allocate(size_t size)
         {
-            IG_BASIC_ASSERT(Ptr != nullptr,
-                            "Allocation already exists! This will result in a memory leak!!!");
-            if (capacity > 0) {
-                Ptr = static_cast<T*>(IG_ALLOCATE_HEAP_MEMORY(capacity * sizeof(T)));
-                IG_BASIC_ASSERT(Ptr == nullptr, "Failed to allocate heap memory");
-                Capacity = capacity;
+            BASIC_ASSERT(ptr != nullptr,
+                         "Allocation already exists! This will result in a memory leak!!!");
+            if (size > 0) {
+                ptr = static_cast<T*>(ALLOCATE_HEAP_MEMORY(size * sizeof(T)));
+                BASIC_ASSERT(ptr == nullptr, "Failed to allocate heap memory");
+                capacity = size;
             }
         }
 
-        IG_FORCE_INLINE void ReAllocate(size_t capacity)
+        FORCE_INLINE void reallocate(size_t size)
         {
-            if (capacity == 0) {
-                Free();
+            if (size == 0) {
+                free();
                 return;
             }
-            if (Ptr == nullptr) {
-                Allocate(capacity);
+            if (ptr == nullptr) {
+                allocate(size);
                 return;
             }
-            Ptr = static_cast<T*>(IG_REALLOCATE_HEAP_MEMORY(Ptr, capacity * sizeof(T)));
-            IG_BASIC_ASSERT(Ptr == nullptr, "Failed to reallocate heap memory");
-            Capacity = capacity;
+            ptr = static_cast<T*>(REALLOCATE_HEAP_MEMORY(ptr, size * sizeof(T)));
+            BASIC_ASSERT(ptr == nullptr, "Failed to reallocate heap memory");
+            capacity = size;
         }
 
-        IG_FORCE_INLINE void Free()
+        FORCE_INLINE void free()
         {
-            if (Ptr != nullptr) {
-                IG_FREE_HEAP_MEMORY(Ptr);
-                SetToNullptr();
+            if (ptr != nullptr) {
+                FREE_HEAP_MEMORY(ptr);
+                set_to_nullptr();
             }
         }
 
-        IG_FORCE_INLINE bool IsEmpty() const { return Ptr == nullptr; }
+        FORCE_INLINE bool is_empty() const { return ptr == nullptr; }
 
-        IG_FORCE_INLINE void SetToNullptr()
+        FORCE_INLINE void set_to_nullptr()
         {
-            Ptr      = nullptr;
-            Capacity = 0;
+            ptr      = nullptr;
+            capacity = 0;
         }
     };
 };
 
 template <size_t SCapacity>
-struct IgFixedAllocation {
+struct FixedAllocation {
     template <typename T>
     struct Allocation {
         using Type                       = T;
-        static constexpr size_t Capacity = SCapacity;
+        static constexpr size_t capacity = SCapacity;
 
-        T Ptr[Capacity];
+        T ptr[capacity];
 
-        IG_FORCE_INLINE constexpr T& operator*() const { return *Ptr; }
-        IG_FORCE_INLINE constexpr T& operator[](size_t index) { return Ptr[index]; }
-        IG_FORCE_INLINE constexpr const T& operator[](size_t index) const { return Ptr[index]; }
+        FORCE_INLINE constexpr T& operator*() const { return *ptr; }
+        FORCE_INLINE constexpr T& operator[](size_t index) { return ptr[index]; }
+        FORCE_INLINE constexpr const T& operator[](size_t index) const { return ptr[index]; }
 
-        IG_FORCE_INLINE constexpr size_t CalcRequiredCapacitySize(size_t fit_size,
+        FORCE_INLINE constexpr size_t calc_required_capacity_size(size_t fit_size,
                                                                   size_t cap_interval_size) const
         {
-            size_t interval_count = (size_t)Ignite::RoundUp((double)fit_size / cap_interval_size);
+            size_t interval_count = (size_t)blerg::round_up((double)fit_size / cap_interval_size);
             size_t size           = cap_interval_size * interval_count;
-            IG_BASIC_ASSERT(size > Capacity, "Cannot increase Fixed Allocation");
+            BASIC_ASSERT(size > capacity, "Cannot increase Fixed Allocation");
             return size;
         }
 
-        IG_FORCE_INLINE constexpr void Allocate(size_t size)
+        FORCE_INLINE constexpr void allocate(size_t size)
         {
-            IG_BASIC_ASSERT(size > Capacity,
-                            "Cannot allocate more than the capacity in a fixed allocator data");
+            BASIC_ASSERT(size > capacity,
+                         "Cannot allocate more than the capacity in a fixed allocator data");
         }
 
-        IG_FORCE_INLINE constexpr void ReAllocate(size_t size)
+        FORCE_INLINE constexpr void reallocate(size_t size)
         {
-            IG_BASIC_ASSERT(size > Capacity, "Cannot resize fixed allocator data");
+            BASIC_ASSERT(size > capacity, "Cannot resize fixed allocator data");
         }
 
-        IG_FORCE_INLINE constexpr bool IsEmpty() const { return false; }
-        IG_FORCE_INLINE constexpr void Free() {}
-        IG_FORCE_INLINE constexpr void SetToNullptr() {}
+        FORCE_INLINE constexpr bool is_empty() const { return false; }
+        FORCE_INLINE constexpr void free() {}
+        FORCE_INLINE constexpr void set_to_nullptr() {}
     };
 };
+
+} // namespace blerg
 
 #endif

@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -7,14 +7,14 @@
 //
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applibasic_stringcable law or agreed to in writing, software
+// Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_STRINGS__STRING_H
-#define IGNITE_CORE_STRINGS__STRING_H
+#ifndef CORE_STRINGS__STRING_H
+#define CORE_STRINGS__STRING_H
 
 #include "core/containers/iterator.h"
 #include "core/limits.h"
@@ -22,362 +22,363 @@
 #include <cstring>
 #include <ctype.h>
 
-template <typename TAllocator, size_t TCapacityIncreaseIntervalSize>
-struct IgString {
+namespace blerg {
+
+template <typename T, typename TAllocator = HeapAllocator,
+          size_t TCapacityIncreaseIntervalSize = DEFAULT_CAPACITY_INTERVAL>
+struct BasicString {
     using Allocation    = typename TAllocator::template Allocation<char>;
-    using Iterator      = IgPackedIterator<char, IgString>;
-    using ConstIterator = IgConstPackedIterator<char, IgString>;
+    using Iterator      = PackedIterator<char, BasicString>;
+    using ConstIterator = ConstPackedIterator<char, BasicString>;
     static constexpr size_t CapacityIncreaseIntervalSize = TCapacityIncreaseIntervalSize;
-    static constexpr size_t NoPos                        = IgNumericLimits<size_t>::Max();
+    static constexpr size_t NoPos                        = NumericLimits<size_t>::max();
 
-    size_t Size          = 0;
-    Allocation Allocator = {};
+    constexpr BasicString() = default;
 
-    constexpr IgString() = default;
-
-    constexpr IgString(size_t size)
-          : Size(size)
+    constexpr BasicString(size_t size)
+          : _size(size)
     {
-        size_t capacity = Allocator.CalcRequiredCapacitySize(size, CapacityIncreaseIntervalSize);
-        Allocator.Allocate(capacity);
-        Allocator.Ptr[size] = '\0';
+        size_t capacity =
+            _allocator.calc_required_capacity_size(size, CapacityIncreaseIntervalSize);
+        _allocator.allocate(capacity);
+        _allocator.ptr[size] = '\0';
     }
 
-    constexpr IgString(const IgStringView& view)
-          : Size(view.Size)
+    constexpr BasicString(const StringView& view)
+          : _size(view.size())
     {
-        Allocator.Allocate(view.Size);
-        Ignite::CopyItems(Begin(), End(), view.Data());
-        Allocator[Size] = '\0';
+        _allocator.allocate(view.size());
+        blerg::copy_items(begin(), end(), view.data());
+        _allocator[_size] = '\0';
     }
 
-    constexpr IgString(const char* str)
-          : IgString(IgStringViewCast<const char*>::Cast(str))
+    constexpr BasicString(const char* str)
+          : BasicString(StringViewCast<const char*>::cast(str))
     {
     }
 
-    constexpr IgString(const IgString& str)
-          : Size(str.Size)
+    constexpr BasicString(const BasicString& str)
+          : _size(str._size)
     {
-        Allocator.Allocate(str.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), str.Allocator.Ptr);
-        Allocator[Size] = '\0';
+        _allocator.allocate(str._allocator.capacity);
+        blerg::copy_items(begin(), end(), str._allocator.ptr);
+        _allocator[_size] = '\0';
     }
 
-    constexpr IgString(IgString&& str)
-          : Size(Ignite::Move(str.Size)), Allocator(Ignite::Move(str.Allocator))
+    constexpr BasicString(BasicString&& str)
+          : _size(blerg::move(str._size)), _allocator(blerg::move(str._allocator))
     {
-        str.Size = 0;
-        str.Allocator.SetToNullptr();
+        str._size = 0;
+        str._allocator.set_to_nullptr();
     }
 
-    ~IgString() { Destroy(); }
+    ~BasicString() { destroy(); }
 
-    constexpr Iterator Begin() { return Iterator(this, 0); }
-    constexpr Iterator End() { return Iterator(this, Size); }
-    constexpr ConstIterator Begin() const { return ConstIterator(const_cast<IgString*>(this), 0); }
-    constexpr ConstIterator End() const
+    constexpr Iterator begin() { return Iterator(this, 0); }
+    constexpr Iterator end() { return Iterator(this, _size); }
+    constexpr ConstIterator begin() const
     {
-        return ConstIterator(const_cast<IgString*>(this), Size);
+        return ConstIterator(const_cast<BasicString*>(this), 0);
+    }
+    constexpr ConstIterator end() const
+    {
+        return ConstIterator(const_cast<BasicString*>(this), _size);
     }
 
-    constexpr Iterator begin() { return Begin(); }
-    constexpr Iterator end() { return End(); }
-    constexpr ConstIterator begin() const { return Begin(); }
-    constexpr ConstIterator end() const { return End; }
+    constexpr size_t capacity() const { return _allocator.capacity; }
+    constexpr char* data() { return _allocator.ptr; }
+    constexpr const char* data() const { return _allocator.ptr; }
+    constexpr const char* cstr() const { return _allocator.ptr; }
+    constexpr size_t size() const { return _size; }
 
-    constexpr size_t Capacity() const { return Allocator.Capacity; }
-    constexpr char* Data() { return Allocator.Ptr; }
-    constexpr const char* Data() const { return Allocator.Ptr; }
-    constexpr const char* CStr() const { return Allocator.Ptr; }
-
-    // constexpr bool IsEmpty() const { return Allocator.IsEmpty() || (Size == 0 || Size == NoPos);
+    // constexpr bool is_empty() const { return _allocator.is_empty() || (_size == 0 || _size ==
+    // NoPos);
     // }
-    constexpr bool IsEmpty() const { return Allocator.IsEmpty(); }
-    constexpr bool IsAllocatorEmpty() const { return Allocator.IsEmpty(); }
+    constexpr bool is_empty() const { return _allocator.is_empty(); }
+    constexpr bool is_allocator_empty() const { return _allocator.is_empty(); }
 
-    constexpr char& operator[](size_t index) { return Allocator.Ptr[index]; }
-    constexpr const char& operator[](size_t index) const { return Allocator.Ptr[index]; }
+    constexpr char& operator[](size_t index) { return _allocator.ptr[index]; }
+    constexpr const char& operator[](size_t index) const { return _allocator.ptr[index]; }
 
-    constexpr IgString& operator=(const IgStringView& view)
+    constexpr BasicString& operator=(const StringView& view)
     {
-        Size = view.Size;
-        Allocator.Allocate(view.Size);
-        Ignite::CopyItems(Begin(), End(), view.Data());
-        Allocator[Size] = '\0';
+        _size = view.size();
+        _allocator.allocate(view.size());
+        blerg::copy_items(begin(), end(), view.data());
+        _allocator[_size] = '\0';
     }
 
-    constexpr IgString& operator=(const char* str)
+    constexpr BasicString& operator=(const char* str)
     {
-        return *this = IgStringViewCast<const char*>::Cast(str);
+        return *this = StringViewCast<const char*>::cast(str);
     }
 
-    constexpr IgString& operator=(const IgString& str)
+    constexpr BasicString& operator=(const BasicString& str)
     {
-        Size = str.Size;
-        Allocator.Allocate(str.Allocator.Capacity);
-        Ignite::CopyItems(Begin(), End(), str.Allocator.Ptr);
-        Allocator[Size] = '\0';
+        _size = str._size;
+        _allocator.allocate(str._allocator.capacity);
+        blerg::copy_items(begin(), end(), str._allocator.ptr);
+        _allocator[_size] = '\0';
         return *this;
     }
 
-    constexpr IgString& operator=(IgString&& str)
+    constexpr BasicString& operator=(BasicString&& str)
     {
-        Size      = Ignite::Move(str.Size);
-        Allocator = Ignite::Move(str.Allocator);
+        _size      = blerg::move(str._size);
+        _allocator = blerg::move(str._allocator);
 
-        str.Size = 0;
-        str.Allocator.SetToNullptr();
+        str._size = 0;
+        str._allocator.set_to_nullptr();
         return *this;
     }
 
-    constexpr bool operator!=(const IgString& str) const { return !(*this == str); }
-    constexpr bool operator==(const IgString& str) const
+    constexpr bool operator!=(const BasicString& str) const { return !(*this == str); }
+    constexpr bool operator==(const BasicString& str) const
     {
-        if (Size != str.Size) {
+        if (_size != str._size) {
             return false;
         }
-        for (size_t i = 0; i < Size; i++) {
-            if (Allocator[i] != str.Allocator[i]) {
+        for (size_t i = 0; i < _size; i++) {
+            if (_allocator[i] != str._allocator[i]) {
                 return false;
             }
         }
         return true;
     }
 
-    constexpr bool operator!=(const IgStringView& view) const { return !(*this == view); }
-    constexpr bool operator==(const IgStringView& view) const
+    constexpr bool operator!=(const StringView& view) const { return !(*this == view); }
+    constexpr bool operator==(const StringView& view) const
     {
-        return IgStringViewCast<IgString>::Cast(*this).Compare(view);
+        return StringViewCast<BasicString>::Cast(*this).Compare(view);
     }
 
     constexpr bool operator!=(const char* cstr) const { return !(*this == cstr); }
     constexpr bool operator==(const char* cstr) const
     {
-        return IgStringViewCast<IgString>::Cast(*this).Compare(
-            IgStringView(cstr, Ignite::CStrLength(cstr)));
+        return StringViewCast<BasicString>::Cast(*this).Compare(
+            StringView(cstr, blerg::cstr_length(cstr)));
     }
 
-    constexpr void Clear()
+    constexpr void clear()
     {
-        Size             = 0;
-        Allocator.Ptr[0] = '\0';
+        _size             = 0;
+        _allocator.ptr[0] = '\0';
     }
 
-    constexpr void Destroy()
+    constexpr void destroy()
     {
-        Size = 0;
-        if (Allocator.Ptr != nullptr) {
-            Allocator.Free();
+        _size = 0;
+        if (_allocator.ptr != nullptr) {
+            _allocator.free();
         }
     }
 
-    constexpr void Resize(size_t size)
+    constexpr void resize(size_t size)
     {
-        if (size > Allocator.Capacity) {
+        if (size > _allocator.capacity) {
             size_t capacity =
-                Allocator.CalcRequiredCapacitySize(size, CapacityIncreaseIntervalSize);
-            Allocator.ReAllocate(capacity);
-            Allocator.Ptr[Size] = '\0';
+                _allocator.calc_required_capacity_size(size, CapacityIncreaseIntervalSize);
+            _allocator.reallocate(capacity);
+            _allocator.ptr[_size] = '\0';
         }
-        Size = size;
+        _size = size;
     }
 
-    constexpr void Reserve(size_t capacity)
+    constexpr void reserve(size_t capacity)
     {
-        Allocator.ReAllocate(capacity);
-        if (capacity < Size) {
-            Size                = capacity;
-            Allocator.Ptr[Size] = '\0';
+        _allocator.reallocate(capacity);
+        if (capacity < _size) {
+            _size                 = capacity;
+            _allocator.ptr[_size] = '\0';
         }
     }
 
-    constexpr void Append(const IgString& str)
+    constexpr void append(const BasicString& str)
     {
-        size_t oldSize = Size;
-        Resize(Size + str.Size);
-        std::strncpy(Allocator.Ptr + oldSize, str.Allocator.Ptr, str.Size);
-        Allocator[Size] = '\0';
+        size_t oldSize = _size;
+        resize(_size + str._size);
+        std::strncpy(_allocator.ptr + oldSize, str._allocator.ptr, str._size);
+        _allocator[_size] = '\0';
     }
 
-    constexpr void Append(const IgStringView& str)
+    constexpr void append(const StringView& str)
     {
-        size_t oldSize = Size;
-        Resize(Size + str.Size);
-        std::strncpy(Allocator.Ptr + oldSize, str.Ptr, str.Size);
-        Allocator[Size] = '\0';
+        size_t oldSize = _size;
+        resize(_size + str.size());
+        std::strncpy(_allocator.ptr + oldSize, str.data(), str.size());
+        _allocator[_size] = '\0';
     }
 
-    constexpr void Insert(Iterator pos, const IgString str)
+    constexpr void insert(Iterator pos, const BasicString str)
     {
-        size_t oldSize = Size;
-        Resize(oldSize + str.Size);
-        std::memmove(pos.Ptr() + str.Size, pos.Ptr(), str.Size);
-        std::strncpy(pos.Ptr(), str.Allocator.Ptr, str.Size);
-        Allocator[Size] = '\0';
+        size_t oldSize = _size;
+        resize(oldSize + str._size);
+        std::memmove(pos.ptr() + str._size, pos.ptr(), str._size);
+        std::strncpy(pos.ptr(), str._allocator.ptr, str._size);
+        _allocator[_size] = '\0';
     }
 
-    constexpr void Insert(Iterator pos, const IgStringView& str)
+    constexpr void insert(Iterator pos, const StringView& str)
     {
-        size_t oldSize = Size;
-        Resize(oldSize + str.Size);
-        std::memmove(pos.Ptr() + str.Size, pos.Ptr(), str.Size);
-        std::strncpy(pos.Ptr(), str.Ptr, str.Size);
-        Allocator[Size] = '\0';
+        size_t oldSize = _size;
+        resize(oldSize + str.size());
+        std::memmove(pos.ptr() + str.size(), pos.ptr(), str.size());
+        std::strncpy(pos.ptr(), str.data(), str.size());
+        _allocator[_size] = '\0';
     }
 
-    constexpr void Insert(Iterator pos, const char* str)
+    constexpr void insert(Iterator pos, const char* str)
     {
-        Insert(pos, IgStringViewCast<const char*>::Cast(str));
+        insert(pos, StringViewCast<const char*>::cast(str));
     }
 
-    constexpr void PopBack(size_t size = 1)
+    constexpr void pop_back(size_t size = 1)
     {
         if (size == 0) {
             return;
         }
-        if (size >= Size) {
-            Clear();
+        if (size >= _size) {
+            clear();
             return;
         }
-        Resize(Size - size);
-        Allocator[Size] = '\0';
+        resize(_size - size);
+        _allocator[_size] = '\0';
     }
 
-    constexpr void PopFront(size_t size = 1)
+    constexpr void pop_front(size_t size = 1)
     {
         if (size == 0) {
             return;
         }
-        if (size >= Size) {
-            Clear();
+        if (size >= _size) {
+            clear();
             return;
         }
-        size_t newSize = Size - size;
-        std::memmove(Allocator.Ptr, Allocator.Ptr + size, newSize);
-        Resize(newSize);
-        Allocator[Size] = '\0';
+        size_t newSize = _size - size;
+        std::memmove(_allocator.ptr, _allocator.ptr + size, newSize);
+        resize(newSize);
+        _allocator[_size] = '\0';
     }
 
-    constexpr void Erase(Iterator begin, Iterator end)
+    constexpr void erase(Iterator begin, Iterator end)
     {
-        size_t size = end.Ptr() - begin.Ptr();
+        size_t size = end.ptr() - begin.ptr();
         if (size == 0) {
             return;
         }
-        if (size >= Size) {
-            Clear();
+        if (size >= _size) {
+            clear();
             return;
         }
-        size_t newSize = Size - size;
-        std::memmove(begin.Ptr(), end.Ptr(), newSize);
-        Resize(newSize);
-        Allocator[Size] = '\0';
+        size_t newSize = _size - size;
+        std::memmove(begin.ptr(), end.ptr(), newSize);
+        resize(newSize);
+        _allocator[_size] = '\0';
     }
 
-    constexpr IgStringView Slice(size_t offset, size_t size = NoPos)
+    constexpr StringView slice(size_t offset, size_t size = NoPos)
     {
         if (size == NoPos) {
-            size = Size - offset;
+            size = _size - offset;
         }
-        return IgStringView(Allocator.Ptr + offset, size);
+        return StringView(_allocator.ptr + offset, size);
     }
 
-    constexpr IgStringView Slice(Iterator begin, Iterator end)
+    constexpr StringView slice(Iterator begin, Iterator end)
     {
-        return IgStringView(begin.Ptr(), end.Ptr() - begin.Ptr());
+        return StringView(begin.ptr(), end.ptr() - begin.ptr());
     }
 
-    constexpr const IgStringView Slice(size_t offset, size_t size = NoPos) const
+    constexpr const StringView slice(size_t offset, size_t size = NoPos) const
     {
         if (size == NoPos) {
-            size = Size - offset;
+            size = _size - offset;
         }
-        return IgStringView(Allocator.Ptr + offset, size);
+        return StringView(_allocator.ptr + offset, size);
     }
 
-    constexpr const IgStringView Slice(ConstIterator begin, ConstIterator end) const
+    constexpr const StringView slice(ConstIterator begin, ConstIterator end) const
     {
-        return IgStringView(begin.Ptr(), end.Ptr() - begin.Ptr());
+        return StringView(begin.ptr(), end.ptr() - begin.ptr());
     }
 
-    constexpr IgString CopySlice(size_t offset, size_t size = NoPos) const
+    constexpr BasicString copy_slice(size_t offset, size_t size = NoPos) const
     {
-        return IgString(Slice(offset, size));
+        return BasicString(slice(offset, size));
     }
 
-    constexpr IgString CopySlice(ConstIterator begin, ConstIterator end) const
+    constexpr BasicString copy_slice(ConstIterator begin, ConstIterator end) const
     {
-        return IgString(Slice(begin.Ptr(), end.Ptr() - begin.Ptr()));
+        return BasicString(slice(begin.ptr(), end.ptr() - begin.ptr()));
     }
 
-    constexpr void WriteToBuffer(char* buffer, size_t maxSize) const
+    constexpr void write_to_buffer(char* buffer, size_t maxSize) const
     {
-        std::strncpy(buffer, Allocator.Ptr, Ignite::Clamp<size_t>(Size, 0, maxSize));
+        std::strncpy(buffer, _allocator.ptr, blerg::clamp<size_t>(_size, 0, maxSize));
     }
 
-    constexpr void ToUpper()
+    constexpr void to_upper()
     {
-        for (size_t i = 0; i < Size; i++) {
-            Allocator[i] = (char)toupper(Allocator[i]);
+        for (size_t i = 0; i < _size; i++) {
+            _allocator[i] = (char)toupper(_allocator[i]);
         }
     }
 
     constexpr void ToLower()
     {
-        for (size_t i = 0; i < Size; i++) {
-            Allocator[i] = (char)tolower(Allocator[i]);
+        for (size_t i = 0; i < _size; i++) {
+            _allocator[i] = (char)tolower(_allocator[i]);
         }
     }
 
-    constexpr void ToCamelCase()
+    constexpr void to_camel_case()
     {
         bool first = true;
-        for (size_t i = 0; i < Size; i++) {
-            if (Allocator[i] == ' ' || Allocator[i] == '-' || Allocator[i] == '_') {
+        for (size_t i = 0; i < _size; i++) {
+            if (_allocator[i] == ' ' || _allocator[i] == '-' || _allocator[i] == '_') {
                 Iterator offset = begin() + i;
-                Erase(offset, offset + 1);
+                erase(offset, offset + 1);
                 if (!first) {
-                    Allocator[i] = (char)toupper(Allocator[i]);
+                    _allocator[i] = (char)toupper(_allocator[i]);
                 }
             }
             else {
-                first        = false;
-                Allocator[i] = (char)tolower(Allocator[i]);
+                first         = false;
+                _allocator[i] = (char)tolower(_allocator[i]);
             }
         }
     }
 
-    constexpr void ToPascalCase()
+    constexpr void to_pascal_case()
     {
         bool first = true;
-        for (size_t i = 0; i < Size; i++) {
+        for (size_t i = 0; i < _size; i++) {
             if (first) {
-                Allocator[i] = (char)toupper(Allocator[i]);
-                first        = false;
+                _allocator[i] = (char)toupper(_allocator[i]);
+                first         = false;
             }
-            else if (Allocator[i] == ' ' || Allocator[i] == '-' || Allocator[i] == '_') {
+            else if (_allocator[i] == ' ' || _allocator[i] == '-' || _allocator[i] == '_') {
                 Iterator offset = begin() + i;
-                Erase(offset, offset + 1);
-                Allocator[i] = (char)toupper(Allocator[i]);
+                erase(offset, offset + 1);
+                _allocator[i] = (char)toupper(_allocator[i]);
             }
             else {
-                Allocator[i] = (char)tolower(Allocator[i]);
+                _allocator[i] = (char)tolower(_allocator[i]);
             }
         }
     }
 
-    constexpr void Trim(char trim = ' ')
+    constexpr void trim(char trim = ' ')
     {
-        if (IsEmpty()) {
+        if (is_empty()) {
             return;
         }
         size_t prefix        = 0;
         size_t suffix        = 0;
         bool counting_prefix = true;
-        for (size_t i = 0; i < Size; i++) {
+        for (size_t i = 0; i < _size; i++) {
             if (counting_prefix) {
-                if (Allocator[i] != trim) {
+                if (_allocator[i] != trim) {
                     counting_prefix = false;
                 }
                 else {
@@ -385,7 +386,7 @@ struct IgString {
                 }
             }
             else {
-                if (Allocator[i] == trim) {
+                if (_allocator[i] == trim) {
                     suffix++;
                 }
                 else {
@@ -393,144 +394,154 @@ struct IgString {
                 }
             }
         }
-        PopBack(suffix);
-        PopFront(prefix);
+        pop_back(suffix);
+        pop_front(prefix);
     }
 
-    constexpr void TrimTrailing(char trim = ' ')
+    constexpr void trim_trailing(char trim = ' ')
     {
         size_t count = 0;
-        for (size_t i = 0; i < Size; i++) {
-            if (Allocator[i] == trim) {
+        for (size_t i = 0; i < _size; i++) {
+            if (_allocator[i] == trim) {
                 count++;
             }
             else {
                 count = 0;
             }
         }
-        PopBack(count);
+        pop_back(count);
     }
 
-    constexpr size_t Find(const IgString& str) const
+    constexpr size_t find(const BasicString& str) const
     {
-        return Find(IgStringView(str.Allocator.Ptr, str.Size));
+        return find(StringView(str._allocator.ptr, str._size));
     }
 
-    constexpr size_t Find(const IgStringView& str) const
+    constexpr size_t find(const StringView& str) const
     {
-        return IgStringView(Allocator.Ptr, Size).Find(str);
+        return StringView(_allocator.ptr, _size).find(str);
     }
 
-    constexpr size_t Find(const char* str) const { return Find(IgStringView(str)); }
+    constexpr size_t Find(const char* str) const { return find(StringView(str)); }
 
-    constexpr size_t FindLast(const IgString& str) const
+    constexpr size_t find_last(const BasicString& str) const
     {
-        return FindLast(IgStringView(str.Allocator.Ptr, str.Size));
+        return find_last(StringView(str._allocator.ptr, str._size));
     }
 
-    constexpr size_t FindLast(const IgStringView& str) const
+    constexpr size_t find_last(const StringView& str) const
     {
-        return IgStringView(Allocator.Ptr, Size).FindLast(str);
+        return StringView(_allocator.ptr, _size).find_last(str);
     }
 
-    constexpr size_t FindLast(const char* str) const { return FindLast(IgStringView(str)); }
+    constexpr size_t find_last(const char* str) const { return find_last(StringView(str)); }
 
     template <typename _ArrayAllocator>
-    constexpr void FindAll(IgArray<size_t, _ArrayAllocator>& buffer, const IgString& str) const
+    constexpr void FindAll(Array<size_t, _ArrayAllocator>& buffer, const BasicString& str) const
     {
-        FindAll(buffer, IgStringView(str.Allocator.Ptr, str.Size));
-    }
-
-    template <typename _ArrayAllocator>
-    constexpr void FindAll(IgArray<size_t, _ArrayAllocator>& buffer, const IgStringView& str) const
-    {
-        IgStringView(Allocator.Ptr, Size).FindAll(buffer, str);
+        find_all(buffer, StringView(str._allocator.ptr, str._size));
     }
 
     template <typename _ArrayAllocator>
-    constexpr void FindAll(IgArray<size_t, _ArrayAllocator>& buffer, const char* str) const
+    constexpr void find_all(Array<size_t, _ArrayAllocator>& buffer, const StringView& str) const
     {
-        FindAll(buffer, IgStringView(str));
+        StringView(_allocator.ptr, _size).find_all(buffer, str);
     }
 
-    constexpr void Replace(const IgString& search, const IgString& replace)
+    template <typename _ArrayAllocator>
+    constexpr void find_all(Array<size_t, _ArrayAllocator>& buffer, const char* str) const
     {
-        Replace(IgStringView(search.Allocator.Ptr, search.Size),
-                IgStringView(replace.Allocator.Ptr, replace.Size));
+        find_all(buffer, StringView(str));
     }
 
-    constexpr bool ReplaceFirst(const IgString& search, const IgString& replace)
+    constexpr void replace(const BasicString& search, const BasicString& replace)
     {
-        return ReplaceFirst(IgStringView(search.Allocator.Ptr, search.Size),
-                            IgStringView(replace.Allocator.Ptr, replace.Size));
+        this->replace(StringView(search._allocator.ptr, search._size),
+                      StringView(replace._allocator.ptr, replace._size));
     }
 
-    constexpr bool ReplaceLast(const IgString& search, const IgString& replace)
+    constexpr bool replace_first(const BasicString& search, const BasicString& replace)
     {
-        return ReplaceLast(IgStringView(search.Allocator.Ptr, search.Size),
-                           IgStringView(replace.Allocator.Ptr, replace.Size));
+        return replace_first(StringView(search._allocator.ptr, search._size),
+                             StringView(replace._allocator.ptr, replace._size));
     }
 
-    constexpr void Replace(const IgStringView& search, const IgStringView& replace)
+    constexpr bool replace_last(const BasicString& search, const BasicString& replace)
+    {
+        return replace_last(StringView(search._allocator.ptr, search._size),
+                            StringView(replace._allocator.ptr, replace._size));
+    }
+
+    constexpr void replace(const StringView& search, const StringView& replace)
     {
         bool next = true;
         while (next) {
-            next = ReplaceFirst(search, replace);
+            next = replace_first(search, replace);
         }
     }
 
-    constexpr bool ReplaceFirst(const IgStringView& search, const IgStringView& replace)
+    constexpr bool replace_first(const StringView& search, const StringView& replace)
     {
-        size_t offset = Find(search);
-        return _ReplaceInstance(offset, search.Size, replace);
+        size_t offset = find(search);
+        return _replace_instance(offset, search.size(), replace);
     }
 
-    constexpr bool ReplaceLast(const IgStringView& search, const IgStringView& replace)
+    constexpr bool replace_last(const StringView& search, const StringView& replace)
     {
-        size_t offset = FindLast(search);
-        return _ReplaceInstance(offset, search.Size, replace);
+        size_t offset = find_last(search);
+        return _replace_instance(offset, search.size(), replace);
     }
 
-    constexpr void Replace(const char* search, const char* replace)
+    constexpr void replace(const char* search, const char* replace)
     {
-        Replace(IgStringView(search), IgStringView(replace));
+        this->replace(StringView(search), StringView(replace));
     }
 
-    constexpr bool ReplaceFirst(const char* search, const char* replace)
+    constexpr bool replace_first(const char* search, const char* replace)
     {
 
-        return ReplaceFirst(IgStringView(search), IgStringView(replace));
+        return replace_first(StringView(search), StringView(replace));
     }
 
-    constexpr bool ReplaceLast(const char* search, const char* replace)
+    constexpr bool replace_last(const char* search, const char* replace)
     {
-        return ReplaceLast(IgStringView(search), IgStringView(replace));
+        return replace_last(StringView(search), StringView(replace));
     }
 
 private:
-    constexpr bool _ReplaceInstance(size_t pos, size_t search_size, const IgStringView& replace)
+    size_t _size          = 0;
+    Allocation _allocator = {};
+
+    constexpr bool _replace_instance(size_t pos, size_t search_size, const StringView& replace)
     {
         if (pos == NoPos) {
             return false;
         }
-        Resize(Size - search_size + replace.Size);
+        resize(_size - search_size + replace.size());
 
-        Iterator offset = Begin() + pos;
-        std::memmove(offset.Ptr() + replace.Size, offset.Ptr() + search_size,
-                     end().Ptr() - (offset.Ptr() + replace.Size));
-        std::strncpy(offset.Ptr(), replace.Ptr, replace.Size);
-        Allocator[Size] = '\0';
+        Iterator offset = begin() + pos;
+        std::memmove(offset.ptr() + replace.size(), offset.ptr() + search_size,
+                     end().ptr() - (offset.ptr() + replace.size()));
+        std::strncpy(offset.ptr(), replace.data(), replace.size());
+        _allocator[_size] = '\0';
         return true;
     }
 };
 
-template <typename _Allocator, size_t _CapacityIncreaseIntervalSize>
-struct IgStringViewCast<IgString<_Allocator, _CapacityIncreaseIntervalSize>> {
-    static constexpr IgStringView
-        Cast(const IgString<_Allocator, _CapacityIncreaseIntervalSize>& str)
+template <typename T, typename _Allocator, size_t _CapacityIncreaseIntervalSize>
+struct StringViewCast<BasicString<T, _Allocator, _CapacityIncreaseIntervalSize>> {
+    static constexpr StringView
+        Cast(const BasicString<T, _Allocator, _CapacityIncreaseIntervalSize>& str)
     {
-        return IgStringView(str.Data(), str.Size);
+        return StringView(str.data(), str._size);
     }
 };
+
+typedef BasicString<char> String;
+
+template <size_t TSize>
+using StringBuffer = BasicString<char, FixedAllocation<TSize>>;
+
+} // namespace blerg
 
 #endif

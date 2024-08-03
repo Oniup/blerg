@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,161 +13,165 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_CONTAINERS__ITERATOR_H
-#define IGNITE_CORE_CONTAINERS__ITERATOR_H
+#ifndef CORE_CONTAINERS__ITERATOR_H
+#define CORE_CONTAINERS__ITERATOR_H
 
-#include "core/common.h"
+#include <cstdio>
 
-template <typename _T, typename _PackedContainer>
-struct IgPackedIterator {
-    using Type            = _T;
-    using PackedContainer = _PackedContainer;
+namespace blerg {
 
-    PackedContainer* Container = nullptr;
-    size_t Offset              = 0;
+template <typename T, typename TPackedContainer>
+struct PackedIterator {
+    using Type            = T;
+    using PackedContainer = TPackedContainer;
 
-    constexpr IgPackedIterator() = default;
-    constexpr IgPackedIterator(PackedContainer* container, size_t offset)
-          : Container(container), Offset(offset)
+    constexpr PackedIterator() = default;
+    constexpr PackedIterator(PackedContainer* container, size_t offset)
+          : _container(container), _offset(offset)
     {
     }
 
-    inline _T* Ptr() { return Container->Data() + Offset; }
-    inline const _T* Ptr() const { return Container->Data() + Offset; }
+    inline T* ptr() { return _container->data() + _offset; }
+    inline const T* ptr() const { return _container->data() + _offset; }
 
-    constexpr _T& operator*() { return *Ptr(); }
-    constexpr _T* operator->() { return Ptr(); }
-    constexpr const _T& operator*() const { return *Ptr(); }
-    constexpr const _T* operator->() const { return Ptr(); }
+    constexpr T& operator*() { return *ptr(); }
+    constexpr T* operator->() { return ptr(); }
+    constexpr const T& operator*() const { return *ptr(); }
+    constexpr const T* operator->() const { return ptr(); }
 
-    constexpr bool operator==(const IgPackedIterator& iter) const { return Ptr() == iter.Ptr(); }
-    constexpr bool operator!=(const IgPackedIterator& iter) const { return Ptr() != iter.Ptr(); }
+    constexpr bool operator==(const PackedIterator& iter) const { return ptr() == iter.ptr(); }
+    constexpr bool operator!=(const PackedIterator& iter) const { return ptr() != iter.ptr(); }
 
-    constexpr IgPackedIterator& operator++()
+    constexpr PackedIterator& operator++()
     {
-        Offset++;
+        _offset++;
         return *this;
     }
 
-    constexpr IgPackedIterator operator++(int)
+    constexpr PackedIterator operator++(int)
     {
-        IgPackedIterator temp = *this;
+        PackedIterator temp = *this;
         ++(*this);
         return temp;
     }
 
-    constexpr IgPackedIterator& operator--()
+    constexpr PackedIterator& operator--()
     {
-        Offset--;
+        _offset--;
         return *this;
     }
 
-    constexpr IgPackedIterator operator--(int)
+    constexpr PackedIterator operator--(int)
     {
-        IgPackedIterator temp = *this;
+        PackedIterator temp = *this;
         --(*this);
         return temp;
     }
 
-    constexpr IgPackedIterator operator+(size_t offset) const
+    constexpr PackedIterator operator+(size_t offset) const
     {
-        return IgPackedIterator(Container, Offset + offset);
+        return PackedIterator(_container, _offset + offset);
     }
 
-    constexpr IgPackedIterator operator-(size_t offset) const
+    constexpr PackedIterator operator-(size_t offset) const
     {
-        return IgPackedIterator(Container, Offset - offset);
+        return PackedIterator(_container, _offset - offset);
     }
 
-    constexpr friend IgPackedIterator operator+(size_t offset, const IgPackedIterator& iter)
+    constexpr friend PackedIterator operator+(size_t offset, const PackedIterator& iter)
     {
-        return IgPackedIterator(iter.Container, iter.Offset + offset);
+        return PackedIterator(iter._container, iter._offset + offset);
     }
 
-    constexpr friend IgPackedIterator operator-(size_t offset, const IgPackedIterator& iter)
+    constexpr friend PackedIterator operator-(size_t offset, const PackedIterator& iter)
     {
-        return IgPackedIterator(iter.Container, iter.Offset - offset);
+        return PackedIterator(iter._container, iter._offset - offset);
     }
+
+private:
+    PackedContainer* _container = nullptr;
+    size_t _offset              = 0;
 };
 
-template <typename _T, typename _PackedContainer>
-struct IgConstPackedIterator {
-    using Type            = _T;
-    using PackedContainer = _PackedContainer;
+template <typename T, typename TPackedContainer>
+struct ConstPackedIterator {
+    using Type            = T;
+    using PackedContainer = TPackedContainer;
 
-    PackedContainer* Container = nullptr;
-    size_t Offset              = 0;
-
-    constexpr IgConstPackedIterator() = default;
-    constexpr IgConstPackedIterator(PackedContainer* container, size_t offset)
-          : Container(container), Offset(offset)
+    constexpr ConstPackedIterator() = default;
+    constexpr ConstPackedIterator(PackedContainer* container, size_t offset)
+          : _container(container), _offset(offset)
     {
     }
 
-    inline const _T* Ptr() const { return Container->Data() + Offset; }
+    inline const T* ptr() const { return _container->data() + _offset; }
 
-    constexpr _T& operator*() { return *Ptr(); }
-    constexpr _T* operator->() { return Ptr(); }
-    constexpr const _T& operator*() const { return *Ptr(); }
-    constexpr const _T* operator->() const { return Ptr(); }
+    constexpr T& operator*() { return *ptr(); }
+    constexpr T* operator->() { return ptr(); }
+    constexpr const T& operator*() const { return *ptr(); }
+    constexpr const T* operator->() const { return ptr(); }
 
-    constexpr bool operator==(const IgConstPackedIterator& iter) const
+    constexpr bool operator==(const ConstPackedIterator& iter) const
     {
-        return Ptr() == iter.Ptr();
+        return ptr() == iter.ptr();
     }
 
-    constexpr bool operator!=(const IgConstPackedIterator& iter) const
+    constexpr bool operator!=(const ConstPackedIterator& iter) const
     {
-        return Ptr() != iter.Ptr();
+        return ptr() != iter.ptr();
     }
 
-    constexpr IgConstPackedIterator& operator++()
+    constexpr ConstPackedIterator& operator++()
     {
-        Offset++;
+        _offset++;
         return *this;
     }
 
-    constexpr IgConstPackedIterator operator++(int)
+    constexpr ConstPackedIterator operator++(int)
     {
-        IgConstPackedIterator temp = *this;
+        ConstPackedIterator temp = *this;
         ++(*this);
         return temp;
     }
 
-    constexpr IgConstPackedIterator& operator--()
+    constexpr ConstPackedIterator& operator--()
     {
-        Offset--;
+        _offset--;
         return *this;
     }
 
-    constexpr IgConstPackedIterator operator--(int)
+    constexpr ConstPackedIterator operator--(int)
     {
-        IgConstPackedIterator temp = *this;
+        ConstPackedIterator temp = *this;
         --(*this);
         return temp;
     }
 
-    constexpr IgConstPackedIterator operator+(size_t offset) const
+    constexpr ConstPackedIterator operator+(size_t offset) const
     {
-        return IgConstPackedIterator(Container, Offset + offset);
+        return ConstPackedIterator(_container, _offset + offset);
     }
 
-    constexpr IgConstPackedIterator operator-(size_t offset) const
+    constexpr ConstPackedIterator operator-(size_t offset) const
     {
-        return IgConstPackedIterator(Container, Offset - offset);
+        return ConstPackedIterator(_container, _offset - offset);
     }
 
-    constexpr friend IgConstPackedIterator operator+(size_t offset,
-                                                     const IgConstPackedIterator& iter)
+    constexpr friend ConstPackedIterator operator+(size_t offset, const ConstPackedIterator& iter)
     {
-        return IgConstPackedIterator(iter.Container, iter.Offset + offset);
+        return ConstPackedIterator(iter._container, iter._offset + offset);
     }
 
-    constexpr friend IgConstPackedIterator operator-(size_t offset,
-                                                     const IgConstPackedIterator& iter)
+    constexpr friend ConstPackedIterator operator-(size_t offset, const ConstPackedIterator& iter)
     {
-        return IgConstPackedIterator(iter.Container, iter.Offset - offset);
+        return ConstPackedIterator(iter._container, iter._offset - offset);
     }
+
+private:
+    PackedContainer* _container = nullptr;
+    size_t _offset              = 0;
 };
+
+} // namespace blerg
 
 #endif

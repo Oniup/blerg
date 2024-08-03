@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,21 +13,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_STRINGS__FORMATTER_H
-#define IGNITE_CORE_STRINGS__FORMATTER_H
+#ifndef CORE_STRINGS__FORMATTER_H
+#define CORE_STRINGS__FORMATTER_H
 
 #include <stdint.h>
 #include <stdio.h>
 
-template <typename... _Args>
-struct IgFormatterArguments {};
+namespace blerg {
 
-template <typename _T>
-struct IgFormatter {
-    using type = _T;
+template <typename... TArgs>
+struct FormatterArguments {};
 
-    template <typename... _Args>
-    static constexpr void Format(char* buffer, size_t size);
+template <typename T>
+struct Formatter {
+    using type = T;
+
+    template <typename... TArgs>
+    static constexpr void format(char* buffer, size_t size);
 };
+
+}
 
 #endif

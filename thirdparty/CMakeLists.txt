@@ -11,7 +11,7 @@ add_subdirectory(glfw)
 
 # Glad
 set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glad)
-target_sources(ignite
+target_sources(blerg_core
     PRIVATE
         ${GLAD_DIR}/include/glad/glad.h
         ${GLAD_DIR}/include/KHR/khrplatform.h
@@ -20,7 +20,7 @@ target_sources(ignite
 
 # Flecs
 set(FLECS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flecs)
-target_sources(ignite
+target_sources(blerg_core
     PRIVATE
         ${FLECS_DIR}/flecs.c
         ${FLECS_DIR}/flecs.h
@@ -28,7 +28,7 @@ target_sources(ignite
 
 # ImGui
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui)
-target_sources(ignite
+target_sources(blerg_core
     PUBLIC
         ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/imgui.h
@@ -50,7 +50,7 @@ target_sources(ignite
 
 # Linking
 # -------------------------------------------------------------------------------
-target_include_directories(ignite
+target_include_directories(blerg_core
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/glm
@@ -62,7 +62,7 @@ target_include_directories(ignite
         ${GLAD_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/flecs
 )
-target_link_libraries(ignite
+target_link_libraries(blerg_core
     PRIVATE
         glfw
 )

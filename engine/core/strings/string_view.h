@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,165 +13,161 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE_STRINGS__STRING_VIEW_H
-#define IGNITE_CORE_STRINGS__STRING_VIEW_H
+#ifndef CORE_STRINGS__STRING_VIEW_H
+#define CORE_STRINGS__STRING_VIEW_H
 
-#include "core/common.h"
 #include "core/containers/array.h"
 #include "core/containers/iterator.h"
 #include "core/limits.h"
 #include "core/strings/cstr_utils.h"
 
+namespace blerg {
+
 template <typename _T>
-struct IgStringViewCast {};
+struct StringViewCast {};
 
-struct IgStringView {
-    using ConstIterator           = IgConstPackedIterator<char, IgStringView>;
-    static constexpr size_t NoPos = IgNumericLimits<size_t>::Max();
+struct StringView {
+    using ConstIterator           = ConstPackedIterator<char, StringView>;
+    static constexpr size_t NoPos = NumericLimits<size_t>::max();
 
-    size_t Size     = 0;
-    const char* Ptr = nullptr;
-
-    constexpr IgStringView() = default;
-    constexpr IgStringView(const char* cstr, size_t size)
-          : Size(size), Ptr(cstr)
+    constexpr StringView() = default;
+    constexpr StringView(const char* cstr, size_t size)
+          : _size(size), _ptr(cstr)
     {
     }
 
-    constexpr IgStringView(const char* cstr)
-          : Size(Ignite::CStrLength(cstr)), Ptr(cstr)
+    constexpr StringView(const char* cstr)
+          : _size(blerg::cstr_length(cstr)), _ptr(cstr)
     {
     }
 
     template <typename _StrT>
-    constexpr IgStringView(const _StrT& str)
-          : IgStringView(IgStringViewCast<_StrT>::Cast(str))
+    constexpr StringView(const _StrT& str)
+          : StringView(StringViewCast<_StrT>::cast(str))
     {
     }
 
-    constexpr IgStringView(const IgStringView& view)
-          : Size(view.Size), Ptr(view.Ptr)
+    constexpr StringView(const StringView& view)
+          : _size(view._size), _ptr(view._ptr)
     {
     }
 
-    constexpr IgStringView(IgStringView&& view)
-          : Size(view.Size), Ptr(view.Ptr)
+    constexpr StringView(StringView&& view)
+          : _size(view._size), _ptr(view._ptr)
     {
-        view.Size = 0;
-        view.Ptr  = nullptr;
+        view._size = 0;
+        view._ptr  = nullptr;
     }
 
-    constexpr ConstIterator Begin() const
+    constexpr ConstIterator begin() const
     {
-        return ConstIterator(const_cast<IgStringView*>(this), 0);
+        return ConstIterator(const_cast<StringView*>(this), 0);
     }
 
-    constexpr ConstIterator End() const
+    constexpr ConstIterator end() const
     {
-        return ConstIterator(const_cast<IgStringView*>(this), Size);
+        return ConstIterator(const_cast<StringView*>(this), _size);
     }
 
-    constexpr ConstIterator begin() const { return Begin(); }
-    constexpr ConstIterator end() const { return End(); }
+    constexpr const char* data() const { return _ptr; }
+    constexpr size_t size() const { return _size; }
 
-    constexpr const char* Data() const { return Ptr; }
+    constexpr const char& at(size_t index) const { return _ptr[index]; }
+    constexpr const char& first() const { return _ptr[0]; }
+    constexpr const char& last() const { return _ptr[_size - 1]; }
 
-    constexpr const char& At(size_t index) const { return Ptr[index]; }
-    constexpr const char& First() const { return Ptr[0]; }
-    constexpr const char& Last() const { return Ptr[Size - 1]; }
+    inline constexpr bool is_empty() const { return _ptr == nullptr; }
+    inline constexpr bool is_null_terminated() const { return _size == 0 || _ptr[_size] == '\0'; }
 
-    inline constexpr bool IsEmpty() const { return Ptr == nullptr; }
-    inline constexpr bool IsNullTerminated() const { return Size == 0 || Ptr[Size] == '\0'; }
-
-    constexpr char operator[](size_t offset) const { return Ptr[offset]; }
-    constexpr bool operator==(const IgStringView& view) const { return Compare(view); }
-    constexpr bool operator!=(const IgStringView& view) const { return !Compare(view); }
+    constexpr char operator[](size_t offset) const { return _ptr[offset]; }
+    constexpr bool operator==(const StringView& view) const { return compare(view); }
+    constexpr bool operator!=(const StringView& view) const { return !compare(view); }
 
     template <typename _StrT>
     inline constexpr bool operator==(const _StrT& str) const
     {
-        return IgStringViewCast<_StrT>::Cast(str) == *this;
+        return StringViewCast<_StrT>::Cast(str) == *this;
     }
 
     template <typename _StrT>
     inline constexpr bool operator!=(const _StrT& str) const
     {
-        return IgStringViewCast<_StrT>::Cast(str) != *this;
+        return StringViewCast<_StrT>::Cast(str) != *this;
     }
 
-    constexpr IgStringView& operator=(const char* str)
+    constexpr StringView& operator=(const char* str)
     {
-        Ptr  = str;
-        Size = Ignite::CStrLength(str);
+        _ptr  = str;
+        _size = blerg::cstr_length(str);
         return *this;
     }
 
-    constexpr IgStringView& operator=(const IgStringView& str)
+    constexpr StringView& operator=(const StringView& str)
     {
-        Ptr  = str.Ptr;
-        Size = str.Size;
+        _ptr  = str._ptr;
+        _size = str._size;
         return *this;
     }
 
-    constexpr IgStringView& operator=(IgStringView&& str)
+    constexpr StringView& operator=(StringView&& str)
     {
-        Ptr  = str.Ptr;
-        Size = str.Size;
+        _ptr  = str._ptr;
+        _size = str._size;
 
-        str.Ptr  = nullptr;
-        str.Size = 0;
+        str._ptr  = nullptr;
+        str._size = 0;
         return *this;
     }
 
     template <typename _StrT>
-    inline constexpr IgStringView& operator=(const _StrT& str)
+    inline constexpr StringView& operator=(const _StrT& str)
     {
-        *this = IgStringViewCast<_StrT>::Cast(str);
+        *this = StringViewCast<_StrT>::Cast(str);
         return *this;
     }
 
-    constexpr IgStringView Slice(size_t offset, size_t size = NoPos) const
+    constexpr StringView slice(size_t offset, size_t size = NoPos) const
     {
         if (size == NoPos) {
-            size = Size - offset;
+            size = _size - offset;
         }
-        return IgStringView(Ptr + offset, size);
+        return StringView(_ptr + offset, size);
     }
 
-    constexpr void Set(const IgStringView& str)
+    constexpr void set(const StringView& str)
     {
-        Ptr  = str.Ptr;
-        Size = str.Size;
+        _ptr  = str._ptr;
+        _size = str._size;
     }
 
-    constexpr bool Compare(const IgStringView& str) const
+    constexpr bool compare(const StringView& str) const
     {
-        if (str.Size != Size) {
+        if (str._size != _size) {
             return false;
         }
-        return Ignite::CStrCompare(Ptr, str.Ptr, Size);
+        return blerg::cstr_compare(_ptr, str._ptr, _size);
     }
 
-    constexpr size_t Find(const IgStringView& match) const
+    constexpr size_t find(const StringView& match) const
     {
-        for (size_t i = 0; i < Size; i++) {
-            if (match.Size > Size - i) {
+        for (size_t i = 0; i < _size; i++) {
+            if (match._size > _size - i) {
                 return NoPos;
             }
-            else if (Slice(i, match.Size) == match) {
+            else if (slice(i, match._size) == match) {
                 return i;
             }
         }
         return NoPos;
     }
 
-    constexpr size_t FindLast(const IgStringView& match) const
+    constexpr size_t find_last(const StringView& match) const
     {
-        for (size_t i = Size - match.Size; i >= 0; i--) {
-            if (match.Size > Size - i) {
+        for (size_t i = _size - match._size; i >= 0; i--) {
+            if (match._size > _size - i) {
                 return NoPos;
             }
-            else if (Slice(i, match.Size) == match) {
+            else if (slice(i, match._size) == match) {
                 return i;
             }
         }
@@ -179,57 +175,62 @@ struct IgStringView {
     }
 
     template <typename _ArrayAllocator>
-    constexpr void FindAll(IgArray<size_t, _ArrayAllocator>& buffer,
-                           const IgStringView& match) const
+    constexpr void find_all(Array<size_t, _ArrayAllocator>& buffer, const StringView& match) const
     {
-        if (!(match.Size > 0)) {
+        if (!(match._size > 0)) {
             return;
         }
-        for (size_t i = 0; i < Size; i++) {
-            if (match.Size > Size - i) {
+        for (size_t i = 0; i < _size; i++) {
+            if (match._size > _size - i) {
                 break;
             }
-            else if (Slice(i, match.Size) == match) {
-                buffer.PushBack(i);
+            else if (slice(i, match._size) == match) {
+                buffer.push_back(i);
             }
         }
     }
+
+private:
+    size_t _size     = 0;
+    const char* _ptr = nullptr;
 };
 
 template <>
-struct IgStringViewCast<IgStringView> {
-    static constexpr IgStringView Cast(const IgStringView& view) { return view; }
+struct StringViewCast<StringView> {
+    static constexpr StringView cast(const StringView& view) { return view; }
 };
 
 template <>
-struct IgStringViewCast<const char*> {
-    static constexpr IgStringView Cast(const char* cstr)
+struct StringViewCast<const char*> {
+    static constexpr StringView cast(const char* cstr)
     {
-        return IgStringView(cstr, Ignite::CStrLength(cstr));
+        return StringView(cstr, blerg::cstr_length(cstr));
     }
 };
 
 template <>
-struct IgStringViewCast<char*> {
-    static constexpr IgStringView Cast(char* cstr)
+struct StringViewCast<char*> {
+    static constexpr StringView cast(char* cstr)
     {
-        return IgStringView(cstr, Ignite::CStrLength(cstr));
+        return StringView(cstr, blerg::cstr_length(cstr));
     }
 };
 
 template <size_t _Size>
-struct IgStringViewCast<char[_Size]> {
-    static constexpr IgStringView Cast(char (&cstr)[_Size])
+struct StringViewCast<char[_Size]> {
+    static constexpr StringView cast(char (&cstr)[_Size])
     {
-        return IgStringView(cstr, Ignite::CStrLength(cstr));
+        return StringView(cstr, blerg::cstr_length(cstr));
     }
 };
 template <size_t _Size>
-struct IgStringViewCast<const char[_Size]> {
-    static constexpr IgStringView Cast(const char (&cstr)[_Size])
+struct StringViewCast<const char[_Size]> {
+    static constexpr StringView cast(const char (&cstr)[_Size])
     {
-        return IgStringView(cstr, Ignite::CStrLength(cstr));
+        return StringView(cstr, blerg::cstr_length(cstr));
     }
 };
+
+} // namespace blerg
 
 #endif

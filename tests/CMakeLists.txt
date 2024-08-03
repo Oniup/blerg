@@ -7,17 +7,17 @@ else()
     target_include_directories(tests
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${ignite_INCLUDE_DIRS}
+            ${blerg_core_INCLUDE_DIRS}
             ${gtest_INCLUDE_DIRS}
     )
     target_link_libraries(tests
         PRIVATE
-            ignite
+            blerg_core
             GTest::GTest
     )
 
-    file(GLOB_RECURSE IGNITE_TEST_SOURCES RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
-    target_sources(tests PRIVATE ${IGNITE_TEST_SOURCES})
+    file(GLOB_RECURSE BLERG_TEST_SOURCES RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
+    target_sources(tests PRIVATE ${BLERG_TEST_SOURCES})
 
     # Automatically discover the tests
     include(GoogleTest)

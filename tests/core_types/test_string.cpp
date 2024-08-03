@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,187 +16,189 @@
 #include "core/strings/string.h"
 #include <gtest/gtest.h>
 
-TEST(IgStringTest, DefaultConstructor)
+using namespace blerg;
+
+TEST(StringTest, DefaultConstructor)
 {
-    IgString str;
-    EXPECT_EQ(str.Size, 0);
-    EXPECT_TRUE(str.IsEmpty());
+    String str;
+    EXPECT_EQ(str.size(), 0);
+    EXPECT_TRUE(str.is_empty());
 }
 
-TEST(IgStringTest, SizeConstructor)
+TEST(StringTest, SizeConstructor)
 {
-    IgString str(10);
-    EXPECT_EQ(str.Size, 10);
-    EXPECT_FALSE(str.IsEmpty());
-    EXPECT_EQ(str.Data()[10], '\0');
+    String str(10);
+    EXPECT_EQ(str.size(), 10);
+    EXPECT_FALSE(str.is_empty());
+    EXPECT_EQ(str.data()[10], '\0');
 }
 
-TEST(IgStringTest, StringViewConstructor)
+TEST(StringTest, StringViewConstructor)
 {
-    IgStringView view("Hello", 5);
-    IgString str(view);
-    EXPECT_EQ(str.Size, 5);
-    EXPECT_FALSE(str.IsEmpty());
-    EXPECT_STREQ(str.Data(), "Hello");
+    StringView view("Hello", 5);
+    String str(view);
+    EXPECT_EQ(str.size(), 5);
+    EXPECT_FALSE(str.is_empty());
+    EXPECT_STREQ(str.data(), "Hello");
 }
 
-TEST(IgStringTest, CStringConstructor)
+TEST(StringTest, CStringConstructor)
 {
-    IgString str("Hello");
-    EXPECT_EQ(str.Size, 5);
-    EXPECT_FALSE(str.IsEmpty());
-    EXPECT_STREQ(str.Data(), "Hello");
+    String str("Hello");
+    EXPECT_EQ(str.size(), 5);
+    EXPECT_FALSE(str.is_empty());
+    EXPECT_STREQ(str.data(), "Hello");
 }
 
-TEST(IgStringTest, CopyConstructor)
+TEST(StringTest, CopyConstructor)
 {
-    IgString str1("Hello");
-    IgString str2(str1);
-    EXPECT_EQ(str2.Size, 5);
-    EXPECT_FALSE(str2.IsEmpty());
-    EXPECT_STREQ(str2.Data(), "Hello");
+    String str1("Hello");
+    String str2(str1);
+    EXPECT_EQ(str2.size(), 5);
+    EXPECT_FALSE(str2.is_empty());
+    EXPECT_STREQ(str2.data(), "Hello");
 }
 
-TEST(IgStringTest, MoveConstructor)
+TEST(StringTest, MoveConstructor)
 {
-    IgString str1("Hello");
-    IgString str2(std::move(str1));
-    EXPECT_EQ(str2.Size, 5);
-    EXPECT_FALSE(str2.IsEmpty());
-    EXPECT_STREQ(str2.Data(), "Hello");
-    EXPECT_TRUE(str1.IsEmpty());
+    String str1("Hello");
+    String str2(std::move(str1));
+    EXPECT_EQ(str2.size(), 5);
+    EXPECT_FALSE(str2.is_empty());
+    EXPECT_STREQ(str2.data(), "Hello");
+    EXPECT_TRUE(str1.is_empty());
 }
 
-TEST(IgStringTest, AssignmentOperator)
+TEST(StringTest, AssignmentOperator)
 {
-    IgString str1("Hello");
-    IgString str2;
+    String str1("Hello");
+    String str2;
     str2 = str1;
-    EXPECT_EQ(str2.Size, 5);
-    EXPECT_FALSE(str2.IsEmpty());
-    EXPECT_STREQ(str2.Data(), "Hello");
+    EXPECT_EQ(str2.size(), 5);
+    EXPECT_FALSE(str2.is_empty());
+    EXPECT_STREQ(str2.data(), "Hello");
 }
 
-TEST(IgStringTest, MoveAssignmentOperator)
+TEST(StringTest, MoveAssignmentOperator)
 {
-    IgString str1("Hello");
-    IgString str2;
+    String str1("Hello");
+    String str2;
     str2 = std::move(str1);
-    EXPECT_EQ(str2.Size, 5);
-    EXPECT_FALSE(str2.IsEmpty());
-    EXPECT_STREQ(str2.Data(), "Hello");
-    EXPECT_TRUE(str1.IsEmpty());
+    EXPECT_EQ(str2.size(), 5);
+    EXPECT_FALSE(str2.is_empty());
+    EXPECT_STREQ(str2.data(), "Hello");
+    EXPECT_TRUE(str1.is_empty());
 }
 
-TEST(IgStringTest, EqualityOperator)
+TEST(StringTest, EqualityOperator)
 {
-    IgString str1("Hello");
-    IgString str2("Hello");
+    String str1("Hello");
+    String str2("Hello");
     EXPECT_TRUE(str1 == str2);
 }
 
-TEST(IgStringTest, InequalityOperator)
+TEST(StringTest, InequalityOperator)
 {
-    IgString str1("Hello");
-    IgString str2("World");
+    String str1("Hello");
+    String str2("World");
     EXPECT_TRUE(str1 != str2);
 }
 
-TEST(IgStringTest, Append)
+TEST(StringTest, Append)
 {
-    IgString str1("Hello");
-    IgString str2(" World");
-    str1.Append(str2);
-    EXPECT_EQ(str1.Size, 11);
-    EXPECT_STREQ(str1.Data(), "Hello World");
+    String str1("Hello");
+    String str2(" World");
+    str1.append(str2);
+    EXPECT_EQ(str1.size(), 11);
+    EXPECT_STREQ(str1.data(), "Hello World");
 }
 
-TEST(IgStringTest, Insert)
+TEST(StringTest, Insert)
 {
-    IgString str1("Hello");
-    IgString str2(" World");
-    str1.Insert(str1.Begin() + 5, str2);
-    EXPECT_EQ(str1.Size, 11);
-    EXPECT_STREQ(str1.Data(), "Hello World");
+    String str1("Hello");
+    String str2(" World");
+    str1.insert(str1.begin() + 5, str2);
+    EXPECT_EQ(str1.size(), 11);
+    EXPECT_STREQ(str1.data(), "Hello World");
 }
 
-TEST(IgStringTest, PopBack)
+TEST(StringTest, PopBack)
 {
-    IgString str("Hello");
-    str.PopBack();
-    EXPECT_EQ(str.Size, 4);
-    EXPECT_STREQ(str.Data(), "Hell");
+    String str("Hello");
+    str.pop_back();
+    EXPECT_EQ(str.size(), 4);
+    EXPECT_STREQ(str.data(), "Hell");
 }
 
-TEST(IgStringTest, PopFront)
+TEST(StringTest, PopFront)
 {
-    IgString str("Hello");
-    str.PopFront();
-    EXPECT_EQ(str.Size, 4);
-    EXPECT_STREQ(str.Data(), "ello");
+    String str("Hello");
+    str.pop_front();
+    EXPECT_EQ(str.size(), 4);
+    EXPECT_STREQ(str.data(), "ello");
 }
 
-TEST(IgStringTest, Erase)
+TEST(StringTest, Erase)
 {
-    IgString str("Hello");
-    str.Erase(str.Begin() + 1, str.Begin() + 3);
-    EXPECT_EQ(str.Size, 3);
-    EXPECT_STREQ(str.Data(), "Hlo");
+    String str("Hello");
+    str.erase(str.begin() + 1, str.begin() + 3);
+    EXPECT_EQ(str.size(), 3);
+    EXPECT_STREQ(str.data(), "Hlo");
 }
 
-TEST(IgStringTest, Slice)
+TEST(StringTest, Slice)
 {
-    IgString str("Hello World");
-    IgStringView view = str.Slice(0, 5);
-    EXPECT_EQ(view.Size, 5);
-    EXPECT_TRUE(!view.IsNullTerminated());
-    EXPECT_TRUE(std::strncmp(view.Data(), "Hello", view.Size) == 0);
+    String str("Hello World");
+    StringView view = str.slice(0, 5);
+    EXPECT_EQ(view.size(), 5);
+    EXPECT_TRUE(!view.is_null_terminated());
+    EXPECT_TRUE(std::strncmp(view.data(), "Hello", view.size()) == 0);
 }
 
-TEST(IgStringTest, ToUpper)
+TEST(StringTest, ToUpper)
 {
-    IgString str("hello");
-    str.ToUpper();
-    EXPECT_STREQ(str.Data(), "HELLO");
+    String str("hello");
+    str.to_upper();
+    EXPECT_STREQ(str.data(), "HELLO");
 }
 
-TEST(IgStringTest, ToLower)
+TEST(StringTest, ToLower)
 {
-    IgString str("HELLO");
+    String str("HELLO");
     str.ToLower();
-    EXPECT_STREQ(str.Data(), "hello");
+    EXPECT_STREQ(str.data(), "hello");
 }
 
-TEST(IgStringTest, Trim)
+TEST(StringTest, Trim)
 {
-    IgString str("  Hello World  ");
-    str.Trim();
-    EXPECT_STREQ(str.CStr(), "Hello World");
+    String str("  Hello World  ");
+    str.trim();
+    EXPECT_STREQ(str.cstr(), "Hello World");
 }
 
-TEST(IgStringTest, Find)
+TEST(StringTest, Find)
 {
-    IgString str("Hello World");
+    String str("Hello World");
     EXPECT_EQ(str.Find("World"), 6);
 }
 
-TEST(IgStringTest, Replace)
+TEST(StringTest, Replace)
 {
-    IgString str("Hello World. The World is a great place");
-    str.Replace("World", "Earth");
-    EXPECT_STREQ(str.CStr(), "Hello Earth. The Earth is a great place");
+    String str("Hello World. The World is a great place");
+    str.replace("World", "Earth");
+    EXPECT_STREQ(str.cstr(), "Hello Earth. The Earth is a great place");
 }
 
-TEST(IgStringTest, ReplaceFirst)
+TEST(StringTest, ReplaceFirst)
 {
-    IgString str("Hello World. The World is a great place");
-    str.ReplaceFirst("World", "Earth");
-    EXPECT_STREQ(str.CStr(), "Hello Earth. The World is a great place");
+    String str("Hello World. The World is a great place");
+    str.replace_first("World", "Earth");
+    EXPECT_STREQ(str.cstr(), "Hello Earth. The World is a great place");
 }
 
-TEST(IgStringTest, ReplaceLast)
+TEST(StringTest, ReplaceLast)
 {
-    IgString str("Hello World. The World is a great place");
-    str.ReplaceLast("World", "Earth");
-    EXPECT_STREQ(str.CStr(), "Hello World. The Earth is a great place");
+    String str("Hello World. The World is a great place");
+    str.replace_last("World", "Earth");
+    EXPECT_STREQ(str.cstr(), "Hello World. The Earth is a great place");
 }

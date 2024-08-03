@@ -1,5 +1,5 @@
-// This file is part of Ignite Engine (https://github.com/Oniup/Ignite)
-// Copyright (c) 2024 Oniup (https://github.com/Oniup)
+// This file is part of Blerg (https://github.com/oniup/blerg)
+// Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef IGNITE_CORE__TYPE_TRAITS_H
-#define IGNITE_CORE__TYPE_TRAITS_H
+#ifndef CORE__TYPE_TRAITS_H
+#define CORE__TYPE_TRAITS_H
 
 #include <cstdio>
 #include <type_traits>
 
-namespace Ignite::TypeTraits {
+namespace blerg::type_traits {
 
 template <size_t... _Indices>
 struct index_sequence {
@@ -27,7 +27,7 @@ struct index_sequence {
     static constexpr size_t size() { return sizeof...(_Indices); }
 };
 
-namespace Impl {
+namespace impl {
 
 template <size_t _N, size_t... _Indices>
 struct make_index_sequence : make_index_sequence<_N - 1, _N - 1, _Indices...> {};
@@ -35,10 +35,10 @@ struct make_index_sequence : make_index_sequence<_N - 1, _N - 1, _Indices...> {}
 template <size_t... _Indices>
 struct make_index_sequence<0, _Indices...> : index_sequence<_Indices...> {};
 
-} // namespace Impl
+} // namespace impl
 
 template <size_t _N>
-using make_index_sequence = typename Impl::make_index_sequence<_N>::type;
+using make_index_sequence = typename impl::make_index_sequence<_N>::type;
 
 template <size_t _Index, typename _Head, typename... _Rest>
 struct tuple_type {
@@ -68,6 +68,6 @@ struct pointer_count {
             : 0;
 };
 
-} // namespace Ignite::TypeTraits
+} // namespace blerg::type_traits
 
 #endif
