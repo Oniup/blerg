@@ -1,4 +1,4 @@
-// This file is part of Blerg (https://github.com/oniup/blerg)
+// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,10 +28,10 @@
 #define FNV_HASH128_DEFAULT_OFFSET_BASIS 0x6c62272e07bb014262b821756295c58d
 #define FNV_HASH128_DEFAULT_PRIME 0x0000000001000000000000000000013B
 
-namespace blerg {
+namespace fiwre {
 
-// Fowler–Noll–Vo (FNV) is a non-cryptographic hash function created by Glenn Fowler, Landon
-// Curt Noll, and Kiem-Phong Vo.
+// Fowler–Noll–Vo (FNV) is a non-cryptographic hash function created by Glenn
+// Fowler, Landon Curt Noll, and Kiem-Phong Vo.
 //
 // NOTE: Read more information where I got the algorithm,
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
@@ -39,64 +39,62 @@ namespace blerg {
 // - bytes: Byte data used to compute hash value.
 // - size: Number of bytes provided.
 // - hash: Offset basis (defaults to FNV_HASH64_DEFAULT_OFFSET_BASIS).
-// - prime: Number to multiply each byte by (defaults to FNV_HASH64_DEFAULT_PRIME).
-// Returns: A 64-bit hash value computed using the FNV algorithm.
-inline constexpr uint64_t calc_fnv_hash(const char* bytes, size_t size,
-                                        uint64_t hash  = FNV_HASH64_DEFAULT_OFFSET_BASIS,
-                                        uint64_t prime = FNV_HASH64_DEFAULT_PRIME)
-{
-    for (size_t i = 0; i < size; i++) {
-        hash ^= bytes[i];
-        hash *= prime;
-    }
-    return hash;
+// - prime: Number to multiply each byte by (defaults to
+// FNV_HASH64_DEFAULT_PRIME). Returns: A 64-bit hash value computed using the
+// FNV algorithm.
+inline constexpr uint64_t
+    calc_fnv_hash(const char* bytes, size_t size,
+                  uint64_t hash  = FNV_HASH64_DEFAULT_OFFSET_BASIS,
+                  uint64_t prime = FNV_HASH64_DEFAULT_PRIME) {
+  for (size_t i = 0; i < size; i++) {
+    hash ^= bytes[i];
+    hash *= prime;
+  }
+  return hash;
 }
 
 template <typename T>
 struct Hash {
-    FORCE_INLINE constexpr size_t hash(const T& val) const
-    {
-        return blerg::calc_fnv_hash(blerg::byte_cast(val), sizeof(T));
-    }
+  FORCE_INLINE constexpr size_t hash(const T& val) const {
+    return fiwre::calc_fnv_hash(fiwre::byte_cast(val), sizeof(T));
+  }
 };
 
 template <>
 struct Hash<StringView> {
-    FORCE_INLINE static constexpr uint64_t hash(const StringView& str)
-    {
-        return blerg::calc_fnv_hash(str.data(), str.size());
-    }
+  FORCE_INLINE static constexpr uint64_t hash(const StringView& str) {
+    return fiwre::calc_fnv_hash(str.data(), str.size());
+  }
 };
 
 template <typename TAllocator, size_t TCapacityIncreaseIntervalSize>
 struct Hash<BasicString<char, TAllocator, TCapacityIncreaseIntervalSize>> {
-    FORCE_INLINE static constexpr uint64_t hash(const StringView& str)
-    {
-        return blerg::calc_fnv_hash(str.data(), str.size());
-    }
+  FORCE_INLINE static constexpr uint64_t hash(const StringView& str) {
+    return fiwre::calc_fnv_hash(str.data(), str.size());
+  }
 };
 
 template <typename T>
 struct Comparator {
-    FORCE_INLINE static constexpr bool compare(const T& lhs, const T& rhs) { return lhs == rhs; }
+  FORCE_INLINE static constexpr bool compare(const T& lhs, const T& rhs) {
+    return lhs == rhs;
+  }
 };
 
 template <>
 struct Comparator<const char*> {
-    FORCE_INLINE static constexpr bool compare(const char* lhs, const char* rhs)
-    {
-        return blerg::cstr_compare(lhs, rhs, blerg::cstr_length(lhs));
-    }
+  FORCE_INLINE static constexpr bool compare(const char* lhs, const char* rhs) {
+    return fiwre::cstr_compare(lhs, rhs, fiwre::cstr_length(lhs));
+  }
 };
 
 template <>
 struct Comparator<char*> {
-    FORCE_INLINE static constexpr bool compare(char* lhs, char* rhs)
-    {
-        return blerg::cstr_compare(lhs, rhs, blerg::cstr_length(lhs));
-    }
+  FORCE_INLINE static constexpr bool compare(char* lhs, char* rhs) {
+    return fiwre::cstr_compare(lhs, rhs, fiwre::cstr_length(lhs));
+  }
 };
 
-} // namespace blerg
+} // namespace fiwre
 
 #endif

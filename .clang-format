@@ -1,10 +1,10 @@
 ---
 # Core
 BasedOnStyle: LLVM
-BreakBeforeBraces: Stroustrup
+# BreakBeforeBraces: Stroustrup
 Standard: c++17
 UseTab: Never
-ColumnLimit: 99
+ColumnLimit: 80
 InsertBraces: true
 IncludeBlocks: Merge
 # Alignment
@@ -17,10 +17,10 @@ AlwaysBreakTemplateDeclarations: true
 AlignConsecutiveAssignments: true
 # Indentation
 IndentWrappedFunctionNames: true
-IndentWidth: 4
-ConstructorInitializerIndentWidth: 6
+IndentWidth: 2
+ConstructorInitializerIndentWidth: 2
 PackConstructorInitializers: NextLineOnly
-PPIndentWidth: 4
+PPIndentWidth: 2
 IndentPPDirectives: AfterHash
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 AllowShortFunctionsOnASingleLine: InlineOnly

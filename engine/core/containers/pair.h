@@ -1,4 +1,4 @@
-// This file is part of Blerg (https://github.com/oniup/blerg)
+// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,59 +18,48 @@
 
 #include "core/memory/utils.h"
 
-namespace blerg {
+namespace fiwre {
 
 template <typename TKey, typename TValue>
 struct IgPair {
-    using KeyType   = TKey;
-    using ValueType = TValue;
+  using KeyType   = TKey;
+  using ValueType = TValue;
 
-    TKey key     = {};
-    TValue value = {};
+  TKey key     = {};
+  TValue value = {};
 
-    constexpr IgPair() = default;
+  constexpr IgPair() = default;
 
-    constexpr IgPair(const TKey& first)
-          : key(first), value()
-    {
+  constexpr IgPair(const TKey& first)
+    : key(first), value() {}
+
+  constexpr IgPair(const TKey& first, const TValue& second)
+    : key(first), value(second) {}
+
+  constexpr IgPair(const TKey& first, TValue&& second)
+    : key(first), value(fiwre::move(second)) {}
+
+  constexpr IgPair(TKey&& first, TValue&& second)
+    : key(fiwre::move(first)), value(fiwre::move(second)) {}
+
+  ~IgPair() = default;
+
+  constexpr bool operator==(const IgPair<TKey, TValue>& pair) const {
+    return (key == pair.key) && (value == pair.value);
+  }
+
+  constexpr bool operator!=(const IgPair<TKey, TValue>& pair) const {
+    return (key != pair.key) || (value != pair.value);
+  }
+
+  constexpr bool operator>=(const IgPair<TKey, TValue>& pair) {
+    if (key != pair.key) {
+      return key < pair.key;
     }
-
-    constexpr IgPair(const TKey& first, const TValue& second)
-          : key(first), value(second)
-    {
-    }
-
-    constexpr IgPair(const TKey& first, TValue&& second)
-          : key(first), value(blerg::move(second))
-    {
-    }
-
-    constexpr IgPair(TKey&& first, TValue&& second)
-          : key(blerg::move(first)), value(blerg::move(second))
-    {
-    }
-
-    ~IgPair() = default;
-
-    constexpr bool operator==(const IgPair<TKey, TValue>& pair) const
-    {
-        return (key == pair.key) && (value == pair.value);
-    }
-
-    constexpr bool operator!=(const IgPair<TKey, TValue>& pair) const
-    {
-        return (key != pair.key) || (value != pair.value);
-    }
-
-    constexpr bool operator>=(const IgPair<TKey, TValue>& pair)
-    {
-        if (key != pair.key) {
-            return key < pair.key;
-        }
-        return value < pair.value;
-    }
+    return value < pair.value;
+  }
 };
 
-} // namespace blerg
+} // namespace fiwre
 
 #endif

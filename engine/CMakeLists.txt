@@ -1,8 +1,8 @@
-file(GLOB_RECURSE BLERG_CORE_SOURCES RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
-file(GLOB_RECURSE BLERG_CORE_HEADERS RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.h")
+file(GLOB_RECURSE fiwre_runtime_SOURCES RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
+file(GLOB_RECURSE fiwre_runtime_HEADERS RECURSE ${CMAKE_CURRENT_SOURCE_DIR} "*.h")
 
-target_sources(blerg_core
-    PUBLIC  ${BLERG_CORE_SOURCES}
-    PRIVATE ${BLERG_CORE_HEADERS}
+target_sources(fiwre_runtime
+  PUBLIC  ${fiwre_runtime_SOURCES}
+  PRIVATE ${fiwre_runtime_HEADERS}
 )
-target_include_directories(blerg_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(fiwre_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

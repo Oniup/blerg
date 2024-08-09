@@ -11,16 +11,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED 17)
 
 # CMake Project
 # ------------------------------------------------------------------------------
-project(Blerg)
+project(fiwre)
 set(_VERSION_BUILD_INFO
-    "0.0.1"
-    CACHE INTERNAL "")
+  "0.0.1"
+  CACHE INTERNAL "")
 
-# Ignite build options
+# FIWRE build options
 # ------------------------------------------------------------------------------
-option(BUILD_IGNITE_LIB "Core static library for the editor/games runtimes" ON)
-option(BUILD_IGNITE_LIB_TESTS "Build Blerg Editor executable" ON)
-option(BUILD_IGNITE_EDITOR_EXE "Build all Blerg library tests" ON)
+option(BUILD_FIWRE_LIB "Core runtime static library" ON)
+option(BUILD_FIWRE_LIB_TESTS "Build Editor executable" ON)
+option(BUILD_FIWRE_EDITOR_EXE "Build tests" ON)
 
 # Build directories
 # ------------------------------------------------------------------------------
@@ -30,16 +30,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/binaries)
 
 # Project source files
 # ------------------------------------------------------------------------------
-if(${BUILD_IGNITE_LIB})
-    add_library(blerg_core STATIC)
-    add_subdirectory(thirdparty)
-    add_subdirectory(engine)
+if(${BUILD_FIWRE_LIB})
+  add_library(fiwre_runtime STATIC)
+  add_subdirectory(thirdparty)
+  add_subdirectory(engine)
 endif()
 
-if (${BUILD_IGNITE_LIB_TESTS})
-    add_subdirectory(tests)
+if (${BUILD_FIWRE_LIB_TESTS})
+  add_subdirectory(tests)
 endif()
 
-if(${BUILD_IGNITE_EDITOR_EXE})
-    add_subdirectory(editor)
+if(${BUILD_FIWRE_EDITOR_EXE})
+  add_subdirectory(editor)
 endif()

@@ -1,4 +1,4 @@
-// This file is part of Blerg (https://github.com/oniup/blerg)
+// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,68 +19,63 @@
 template <typename _T>
 class HeapAllocationTest : public ::testing::Test {
 protected:
-    typename blerg::HeapAllocator::template Allocation<_T> alloc;
+  typename fiwre::HeapAllocator::template Allocation<_T> alloc;
 };
 
 using TestTypes = testing::Types<char, int, double>;
 TYPED_TEST_CASE(HeapAllocationTest, TestTypes);
 
-TYPED_TEST(HeapAllocationTest, AllocateTest)
-{
-    this->alloc.allocate(10);
+TYPED_TEST(HeapAllocationTest, AllocateTest) {
+  this->alloc.allocate(10);
 
-    ASSERT_NE(this->alloc.ptr, nullptr);
-    ASSERT_EQ(this->alloc.capacity, 10);
+  ASSERT_NE(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.capacity, 10);
 
-    this->alloc.free();
-    ASSERT_EQ(this->alloc.capacity, 0);
-    ASSERT_EQ(this->alloc.ptr, nullptr);
+  this->alloc.free();
+  ASSERT_EQ(this->alloc.capacity, 0);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
 }
 
-TYPED_TEST(HeapAllocationTest, ReAllocateTest)
-{
-    this->alloc.allocate(10);
-    this->alloc.reallocate(20);
+TYPED_TEST(HeapAllocationTest, ReAllocateTest) {
+  this->alloc.allocate(10);
+  this->alloc.reallocate(20);
 
-    ASSERT_NE(this->alloc.ptr, nullptr);
-    ASSERT_EQ(this->alloc.capacity, 20);
+  ASSERT_NE(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.capacity, 20);
 
-    this->alloc.free();
-    ASSERT_EQ(this->alloc.capacity, 0);
-    ASSERT_EQ(this->alloc.ptr, nullptr);
+  this->alloc.free();
+  ASSERT_EQ(this->alloc.capacity, 0);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
 }
 
-TYPED_TEST(HeapAllocationTest, ReAllocateWithoutInitialAllocationTest)
-{
-    this->alloc.reallocate(20);
+TYPED_TEST(HeapAllocationTest, ReAllocateWithoutInitialAllocationTest) {
+  this->alloc.reallocate(20);
 
-    ASSERT_NE(this->alloc.ptr, nullptr);
-    ASSERT_EQ(this->alloc.capacity, 20);
+  ASSERT_NE(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.capacity, 20);
 
-    this->alloc.free();
-    ASSERT_EQ(this->alloc.capacity, 0);
-    ASSERT_EQ(this->alloc.ptr, nullptr);
+  this->alloc.free();
+  ASSERT_EQ(this->alloc.capacity, 0);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
 }
 
-TYPED_TEST(HeapAllocationTest, AllocateZeroSizeTest)
-{
-    this->alloc.allocate(0);
+TYPED_TEST(HeapAllocationTest, AllocateZeroSizeTest) {
+  this->alloc.allocate(0);
 
-    ASSERT_EQ(this->alloc.ptr, nullptr);
-    ASSERT_EQ(this->alloc.capacity, 0);
-    ASSERT_EQ(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.capacity, 0);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
 
-    this->alloc.free();
+  this->alloc.free();
 }
 
-TYPED_TEST(HeapAllocationTest, ReAllocateZeroSizeTest)
-{
-    this->alloc.allocate(10);
-    this->alloc.reallocate(0);
+TYPED_TEST(HeapAllocationTest, ReAllocateZeroSizeTest) {
+  this->alloc.allocate(10);
+  this->alloc.reallocate(0);
 
-    ASSERT_EQ(this->alloc.ptr, nullptr);
-    ASSERT_EQ(this->alloc.capacity, 0);
-    ASSERT_EQ(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
+  ASSERT_EQ(this->alloc.capacity, 0);
+  ASSERT_EQ(this->alloc.ptr, nullptr);
 
-    this->alloc.free();
+  this->alloc.free();
 }

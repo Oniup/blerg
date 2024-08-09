@@ -1,4 +1,4 @@
-// This file is part of Blerg (https://github.com/oniup/blerg)
+// This file is part of Fiwre (https://github.com/oniup/Fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,19 +19,19 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace blerg {
+namespace fiwre {
 
 template <typename... TArgs>
 struct FormatterArguments {};
 
 template <typename T>
 struct Formatter {
-    using type = T;
+  using type = T;
 
-    template <typename... TArgs>
-    static constexpr void format(char* buffer, size_t size);
+  template <typename... TArgs>
+  static constexpr void format(char* buffer, size_t size);
 };
 
-}
+} // namespace fiwre
 
 #endif
