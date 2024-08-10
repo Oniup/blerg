@@ -3,17 +3,15 @@
 > Keep categories listed alphabetically and the library tile should be matching their respective
 > folder names. Make sure to keep the styling consistent across all entries
 
-### flecs
+### fmt
 
-* ***Upstream***: https://github.com/SanderMertens/flecs
-* ***Version***: 3.2.11
-* ***License***: [MIT](./flecs/LICENSE)
-* ***Extracted Files***:
-	+ flecs.c
-	+ flecs.h
-	+ LICENSE
-	+ CMakeLists.txt
-	+ README.md
+* ***Upstream***: https://github.com/fmtlib/fmt.git
+* ***Verison***: 11.0.2
+* ***License***: [MIT](./fmt/LICENSE)
+* ***Extracted Generated Files***:
+    + LICENSE
+    + README.md
+    + include/*
 
 ### glad
 

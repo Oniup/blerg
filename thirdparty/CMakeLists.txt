@@ -18,14 +18,6 @@ target_sources(fiwre_runtime
     ${GLAD_DIR}/src/glad.c
 )
 
-# Flecs
-set(FLECS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flecs)
-target_sources(fiwre_runtime
-  PRIVATE
-    ${FLECS_DIR}/flecs.c
-    ${FLECS_DIR}/flecs.h
-)
-
 # ImGui
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui)
 target_sources(fiwre_runtime
@@ -55,12 +47,16 @@ target_include_directories(fiwre_runtime
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/glm
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/fmt/include
 
   PRIVATE
     ${glfw_INCLUDE_DIRS}
-    ${IMGUI_DIR}
-    ${GLAD_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/flecs
+    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/glad/include
+)
+target_compile_definitions(fiwre_runtime
+  PUBLIC
+    FMT_HEADER_ONLY
 )
 target_link_libraries(fiwre_runtime
   PRIVATE

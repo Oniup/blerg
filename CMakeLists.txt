@@ -19,8 +19,7 @@ set(_VERSION_BUILD_INFO
 # FIWRE build options
 # ------------------------------------------------------------------------------
 option(BUILD_FIWRE_LIB "Core runtime static library" ON)
-option(BUILD_FIWRE_LIB_TESTS "Build Editor executable" ON)
-option(BUILD_FIWRE_EDITOR_EXE "Build tests" ON)
+option(BUILD_FIWRE_EDITOR_EXE "Build Editor Executable" ON)
 
 # Build directories
 # ------------------------------------------------------------------------------
@@ -34,10 +33,6 @@ if(${BUILD_FIWRE_LIB})
   add_library(fiwre_runtime STATIC)
   add_subdirectory(thirdparty)
   add_subdirectory(engine)
-endif()
-
-if (${BUILD_FIWRE_LIB_TESTS})
-  add_subdirectory(tests)
 endif()
 
 if(${BUILD_FIWRE_EDITOR_EXE})

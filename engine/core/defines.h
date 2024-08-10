@@ -47,12 +47,12 @@
 #endif
 
 #ifndef NDEBUG
-#  define BASIC_ASSERT(__condition, msg)                                       \
-    if ((__condition)) {                                                       \
-      std::fprintf(stderr, "expr=(%s): '%s' => file=%s, func=%s:%d\n",         \
-                   #__condition, (msg), __FILE__, __FUNCTION__, __LINE__);     \
-      GENERATE_TRAP();                                                         \
-    } else                                                                     \
+#  define BASIC_ASSERT(__condition, msg)                                   \
+    if ((__condition)) {                                                   \
+      std::fprintf(stderr, "expr=(%s): '%s' => file=%s, func=%s:%d\n",     \
+                   #__condition, (msg), __FILE__, __FUNCTION__, __LINE__); \
+      GENERATE_TRAP();                                                     \
+    } else                                                                 \
       ((void)0)
 #else
 #  define BASIC_ASSERT(__condition, msg)
@@ -65,7 +65,7 @@
 #  define FREE_HEAP_MEMORY(__ptr) std::free(__ptr)
 #endif
 #ifndef CUSTOM_REALLOCATE_HEAP_MEMORY
-#  define REALLOCATE_HEAP_MEMORY(__ptr, __new_size)                            \
+#  define REALLOCATE_HEAP_MEMORY(__ptr, __new_size) \
     std::realloc(__ptr, __new_size)
 #endif
 

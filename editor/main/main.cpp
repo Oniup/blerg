@@ -13,15 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "core/console.h"
-#include "core/strings/string.h"
 #include <cstdio>
-
-using fiwre::String;
-using fiwre::util::ConsoleManager;
+#include "core/console.h"
 
 int main() {
-  ConsoleManager manager;
-  String str = "This is a test";
+  Console console;
+  console.add_output<ConsoleTerminalOutput>();
+
+  INFO("This is a test");
+  WARN("This is a test");
+  ERROR("This is a test");
+
+  console.destroy();
   return 0;
 }

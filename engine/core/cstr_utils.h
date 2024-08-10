@@ -130,6 +130,6 @@ constexpr bool is_underscore(char32_t ch) {
   return (ch == '_');
 }
 
-} // namespace fiwre
+}  // namespace fiwre
 
 #endif
