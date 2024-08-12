@@ -1,4 +1,3 @@
-// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

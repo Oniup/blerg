@@ -1,4 +1,3 @@
-// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +20,11 @@
 
 #define PI 3.14159265358979323846f
 
-#define INTERNAL_IMAX_BITS(m) \
+#define INTERNAL_IMAX_BITS(m)                                                  \
   ((m) / ((m) % 255 + 1) / 255 % 255 * 8 + 7 - 86 / ((m) % 255 + 12))
 #define INTERNAL_RAND_MAX_WIDTH INTERNAL_IMAX_BITS(RAND_MAX)
 static_assert((RAND_MAX & (RAND_MAX + 1u)) == 0,
               "RAND_MAX not a Mersenne number");
-
-namespace fiwre {
 
 inline uint64_t random_int64() {
   // https://stackoverflow.com/a/33021408
@@ -38,7 +35,5 @@ inline uint64_t random_int64() {
   }
   return val;
 }
-
-}  // namespace fiwre
 
 #endif

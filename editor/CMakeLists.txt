@@ -9,9 +9,9 @@ add_executable(fiwre
 target_include_directories(fiwre
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${fiwre_runtime_INCLUDE_DIRS}
+    ${core_runtime_INCLUDE_DIRS}
 )
 target_link_libraries(fiwre
   PUBLIC
-    fiwre_runtime
+    core_runtime
 )

@@ -30,7 +30,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/binaries)
 # Project source files
 # ------------------------------------------------------------------------------
 if(${BUILD_FIWRE_LIB})
-  add_library(fiwre_runtime STATIC)
+  add_library(core_runtime STATIC)
   add_subdirectory(thirdparty)
   add_subdirectory(engine)
 endif()

@@ -1,4 +1,3 @@
-// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +17,6 @@
 
 #include <cmath>
 #include <cstdint>
-
-namespace fiwre {
 
 inline constexpr double round_up(double val) {
   constexpr size_t intmax = ((INTMAX_MAX / 2 + 1) * 2.0);
@@ -44,7 +41,5 @@ inline constexpr double round_down(double val) {
   }
   return val;
 }
-
-}  // namespace fiwre
 
 #endif

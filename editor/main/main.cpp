@@ -13,17 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cstdio>
 #include "core/console.h"
+#include "core/input.h"
+#include "gfx_rhi/window_handle.h"
+#include <cstdio>
 
 int main() {
   Console console;
-  console.add_output<ConsoleTerminalOutput>();
+  console.add_output<ConsoleTerminalOutput>(
+      ConsoleOutput::s_DefaultOptions | ConsoleOutput::s_DefaultSeverity |
+      ConsoleOutput_SeverityInfoBit | ConsoleOutput_SeverityVerboseBit |
+      ConsoleOutput_SeverityTraceBit);
 
-  INFO("This is a test");
-  WARN("This is a test");
-  ERROR("This is a test");
+  WindowHandle window("Engine Editor");
+  Input input(&window);
 
+  while (!window.closing()) {
+    window.swap_buffers();
+    input.poll_events();
+  }
+
+  window.destroy();
   console.destroy();
   return 0;
 }

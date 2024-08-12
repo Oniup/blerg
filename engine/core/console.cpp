@@ -1,4 +1,3 @@
-// This file is part of Fiwre (https://github.com/oniup/fiwre)
 // Copyright (c) 2024 Oniup (https://github.com/Oniup)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,22 +26,22 @@ struct ConsoleMessage {
 
 static Console* s_ptr = nullptr;
 
-const std::string_view console_severity_to_str(ConsoleOutputFlag severity) {
+const std::string_view console_severity_to_str(int severity) {
   switch (severity) {
-    case ConsoleOutput_SeverityTrace:
-      return "Trace";
-    case ConsoleOutput_SeverityVerbose:
-      return "Verbose";
-    case ConsoleOutput_SeverityInfo:
-      return "Info";
-    case ConsoleOutput_SeverityWarning:
-      return "Warning";
-    case ConsoleOutput_SeverityError:
-      return "Error";
-    case ConsoleOutput_SeverityFatal:
-      return "Fatal";
-    default:
-      return "Invalid";
+  case ConsoleOutput_SeverityTraceBit:
+    return "Trace";
+  case ConsoleOutput_SeverityVerboseBit:
+    return "Verbose";
+  case ConsoleOutput_SeverityInfoBit:
+    return "Info";
+  case ConsoleOutput_SeverityWarnBit:
+    return "Warn";
+  case ConsoleOutput_SeverityErrorBit:
+    return "Error";
+  case ConsoleOutput_SeverityFatalBit:
+    return "Fatal";
+  default:
+    return "Invalid";
   }
 }
 
@@ -50,28 +49,28 @@ std::string ConsoleOutput::_format_head(const ConsoleMessage& msg) {
   fmt::text_style style;
   if (_opts & ConsoleOutput_ColorBit) {
     switch (msg.severity) {
-      case ConsoleOutput_SeverityTrace:
-        style = fmt::fg(fmt::color::dim_gray);
-        break;
-      case ConsoleOutput_SeverityVerbose:
-        style = fmt::fg(fmt::color::dim_gray);
-        break;
-      case ConsoleOutput_SeverityInfo:
-        style = fmt::fg(fmt::color::sky_blue);
-        break;
-      case ConsoleOutput_SeverityWarning:
-        style = fmt::emphasis::italic | fmt::fg(fmt::color::yellow);
-        break;
-      case ConsoleOutput_SeverityError:
-        style = fmt::emphasis::italic | fmt::emphasis::bold |
-                fmt::fg(fmt::color::orange_red);
-        break;
-      case ConsoleOutput_SeverityFatal:
-        style = fmt::emphasis::italic | fmt::fg(fmt::color::white) |
-                fmt::bg(fmt::color::dark_red);
-        break;
-      default:
-        break;
+    case ConsoleOutput_SeverityTraceBit:
+      style = fmt::fg(fmt::color::gray);
+      break;
+    case ConsoleOutput_SeverityVerboseBit:
+      style = fmt::fg(fmt::color::dim_gray);
+      break;
+    case ConsoleOutput_SeverityInfoBit:
+      style = fmt::fg(fmt::color::sky_blue);
+      break;
+    case ConsoleOutput_SeverityWarnBit:
+      style = fmt::emphasis::italic | fmt::fg(fmt::color::yellow);
+      break;
+    case ConsoleOutput_SeverityErrorBit:
+      style = fmt::emphasis::italic | fmt::emphasis::bold |
+              fmt::fg(fmt::color::orange_red);
+      break;
+    case ConsoleOutput_SeverityFatalBit:
+      style = fmt::emphasis::italic | fmt::fg(fmt::color::white) |
+              fmt::bg(fmt::color::dark_red);
+      break;
+    default:
+      break;
     }
   }
 
@@ -88,7 +87,7 @@ std::string ConsoleOutput::_format_body(const ConsoleMessage& msg) {
   body.append(fmt::format(
       "{}", (_opts & ConsoleOutput_BreakAfterHeaderBit) ? "\n" : " "));
   bool include_meta_info = false;
-  if (msg.severity > ConsoleOutput_SeverityInfo) {
+  if (msg.severity > ConsoleOutput_SeverityInfoBit) {
     include_meta_info = true;
     if (_opts & ~ConsoleOutput_FilterFileBit) {
       body.append(fmt::format("file={} ", msg.file));
@@ -111,12 +110,12 @@ std::string ConsoleOutput::_format_body(const ConsoleMessage& msg) {
 }
 
 ConsoleTerminalOutput::ConsoleTerminalOutput(int flags)
-    : ConsoleOutput(flags) {
+      : ConsoleOutput(flags) {
 }
 
 void ConsoleTerminalOutput::print_output(const ConsoleMessage& msg) {
   FILE* out = stdout;
-  if (msg.severity > ConsoleOutput_SeverityWarning) {
+  if (msg.severity > ConsoleOutput_SeverityWarnBit) {
     out = stderr;
   }
   fmt::println(out, "{}{}", _format_head(msg), _format_body(msg));
